@@ -1,0 +1,2047 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>ATIAM-Sep_Sources</title>
+
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/telecom.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/github.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<section class="cover" data-background="figures/background-blur.jpg"  data-state="no-title-footer no-progressbar has-dark-background">
+
+					<h2 id='coverh2'>Introduction à la séparation de sources</h2>
+					<h1  id='title_seminar'> ATIAM</h1>
+					<h3><a href="https://matfontaine.github.io/PAM-SEP", id='github_url'>matfontaine.github.io/MI205</a></h3>
+					<p id='coverauthors'>
+						 Mathieu FONTAINE<br />
+						<a href="mailto:mathieu.fontaine@telecom-paris.fr", class="mail">mathieu.fontaine@telecom-paris.fr</a>
+					</p>
+					<p id="date">
+					Jeudi 18 Janvier 2024
+					</p>
+
+
+					<p>
+					<img src="css/theme/img/logo-Telecom.svg" id="telecom" class="logo" alt="">
+					<aside class="notes">
+						<ul><li>We will consider historical audio source separation technique</li>
+									<li>e.g. no deep learning extensions or nonnegative matrix factorization</li>
+								<li>the Handbook for that course is available on the moodle (PAM/Audio_source_separation)</li>
+						</ul>
+					</aside>
+				</section>
+
+				<!-- Outline of the presentation -->
+
+				<section>
+					<h1> Plan</h1>
+					<h2>Programme par tranche horaire (TH)</h2>
+					<ul>
+						<li>I - Séparation de sources généralités</li>
+						<li>II - Séparation de sources (ICA) </li>
+						<li>III - Séparation de sources (mélange convolutif) </em></li>
+						<li>IV - Espérance-Maximisation</li>
+						<li>V - Factorisation de matrices non négatives (NMF)</li>
+						<li>VI - Factorisation de matrices non négatives multicanal (MNMF)</em></li>
+				    </ul>
+					</section>
+
+
+<!-- TRAITEMENT DU SIGNAL -->
+	<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+		<h2 id='coverh2'>I - Séparation de Sources : généralités </h2>
+	</section>
+
+	<section>
+		<h1>Séparation de sources en musique</h1>
+		<center><figure>
+			<img src="figures/images/audio_source_separation.png" width="80%">
+			<figcaption><em>Séparation de sources musicales</em></figcaption>
+			</figure>
+		</center>
+	</section>
+	
+
+	<section>
+		<h2>Séparation de sources (général)</h2>
+
+		<ul>
+			<li>Art d'estimer des signaux sources, souvent supposés indépendants, via l'observation d'un ou plusieurs mélanges de ces sources</li>
+	 </ul>
+		<h2>Exemples d'applications</h2>
+		<ul>
+			<li>Débruitage/séparation de locuteurs
+			<div class="multiCol" style="margin-top:0.1em">
+				<div class="col">
+					<label for="no_sp">
+					&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp parole bruité<br>
+					</label>
+						<audio id="no_sp" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/no_sp.wav"/>
+							</audio>
+							<label for="multi_sp">
+							<br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp	multi locuteur<br>
+							</label>
+								<audio id="multi_sp" controls>
+								<source
+										type="audio/mpeg"
+										src="multimedia/audio/multi_sp.wav"/>
+									</audio>
+				</div>
+				<div class="col">
+					<label for="cl_sp">
+					&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp parole propre<br>
+					</label>
+						<audio id="cl_sp" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/cl_sp.wav"/>
+							</audio>
+							<label for="one_sp">
+							<br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp	un locuteur<br>
+							</label>
+								<audio id="one_sp" controls>
+								<source
+										type="audio/mpeg"
+										src="multimedia/audio/one_sp.wav"/>
+									</audio>
+				</div></li>
+			<li>Séparation d'instruments de musique
+			<div class="multiCol" style="margin-top:-0.1em">
+				<div class="col">
+					<label for="mix">
+					&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp chanson<br>
+					</label>
+						<audio id="mix" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/mixture.wav"/>
+							</audio>
+								<label for="drums">
+								<br>&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp&nbsp batterie<br>
+								</label>
+									<audio id="drums" controls>
+									<source
+											type="audio/mpeg"
+											src="multimedia/audio/drums.wav"/>
+										</audio>
+
+				</div>
+				<div class="col">
+					<label for="vocals">
+					&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp&nbsp voix<br>
+					</label>
+						<audio id="vocals" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/vocals.wav"/>
+							</audio>
+					<label for="bass">
+					<br>&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp&nbsp basse<br>
+					</label>
+						<audio id="bass" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/bass.wav"/>
+							</audio>
+				</div>
+			</li>
+	 </ul>
+	 <aside class="notes">
+		 <ul><li>Also pitch shifting or time-scaling</li>
+			 <li>respatialization etc.</li>
+		 </ul>
+	 </aside>
+	</section>
+
+	<section>
+		<h2>Typologie des modèles de mélanges</h2>
+
+			<h3 style='margin-top:0.5em;'>Notations</h3>
+			<ul>
+				<li>
+					Observations: $M$ mélanges $x_m(t)$ concaténés dans un vecteur $\bold{x}(t)$
+				</li>
+				<li>
+					inconnus: $N$ sources ponctuelles $s_n(t)$ concaténé dans un vecteur $\bold{s}(t)$
+				</li>
+				<li>
+					Modèle de mélange général: Une fonction $\mathcal{A}$ qui transforme $\bold{s}(t)$ en $\bold{x}(t)$
+				</li>
+			</ul>
+
+			<h3 style='margin-top:0.5em;'>Deux types</h3>
+			<ul>
+
+				<li>mélange linéaire instantanée : $\bold{x}(t)=\bold{A}\bold{s}(t) \\
+					\quad\rightarrow \mathcal{A}$ est définie par la "matrice de mélange"
+					 $\bold{A}$ (de dimension $M\times N$)
+				</li>
+				<li>mélange convolutif : $x_m(t) = \sum_{n=1}^{N} a_{nm}(t) \star  s_n(t)$</li>
+
+			</ul>
+
+			<h3 style='margin-top:0.5em;'>Vocabulaire</h3>
+			<ul>
+				<li>
+					mélanges déterminés : $M=N$
+				</li>
+				<li>
+					mélanges surdéterminés : $M>N$
+				</li>
+				<li>
+					mélanges sous-déterminés : $M < N$
+				</li>
+			</ul>
+			<aside class="notes">
+
+			</aside>
+			<aside class="notes">
+				<ul><li>stationnary+ linear -> convolution product</li>
+					<li>length of the impulse response: this is the memory</li>
+					<li>memory length equal to zero : instantaneous mixtures (IM)</li>
+					<li>IM works well in general for EEG of MEG</li>
+					<li>Problematic for audio application because of the reverberation</li>
+				</ul>
+
+				<ul><li>$M=K$ it ise generally inversible</li>
+					<li>$M> K$: a unique solution can be found in the least squares sense</li>
+					<li>$M> K$: infinite number of solution : we need more informations</li>
+				</ul>
+			</aside>
+</section>
+
+<section>
+	<h2>Mélanges linéaires instantanées</h2>
+	<img src="figures/instantane.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=100%>
+	<aside class="notes">
+		<ul><li>(a) : LR oriented at 90 degree< and approximate a ILM</li>
+			<li> it is never perfectly instantaneous</li>
+			<li>(b): can be created artificially by using a mixing deck of a computer</li>
+		</ul>
+	</aside>
+</section>
+
+<section>
+	<h2>Mélanges linéaires anéchoïques</h2>
+	<img src="figures/anechoique.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=60%>
+	<aside class="notes">
+		<ul><li>can be recorded in an anechoic chamber</li>
+			<li>every impulse response is formed only of a single pulse</li>
+			<li>the pulse is characterized by its delay and its magnitude</li>
+		</ul>
+	</aside>
+
+</section>
+
+<section>
+	<h2>Mélanges linéaires convolutifs</h2>
+	<img src="figures/convolutive.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=100%>
+	<aside class="notes">
+		<ul><li>general case: the impulse response is formed of infinitely many pulses</li>
+			<li>every impulse response is formed only of a single pulse</li>
+			<li>the pulse is characterized by its delay and its magnitude</li>
+			<li>We can also simulate a 3D stereo sound sensation for the listener using headphones</li>
+		</ul>
+	</aside>
+
+</section>
+
+	<section>
+		<h2>Vecteurs aléatoires</h2>
+		<h3 style='margin-top:0.5em;'>Notations</h3>
+		$\bold{x}$ est un vecteur aléatoire de dimension $M$.
+		<ul>
+			<li>les crochets $\phi[\bold{x}]$ dénotent une fonction de $p(\bold{x})$</li>
+			<li>Moyenne : $\mu_{x}=\mathbb{E}[\bold{x}]$</li>
+			<li>Matrice de covariance : $\Sigma_{xx}=\mathbb{E}[(\bold{x}-\mu_x)(\bold{x}-\mu_x)^\mathsf{H}]$</li>
+		</ul>
+		<h2>Vecteur gaussien complexe circulaire</h2>
+		<ul>
+			<li> $\bold{x}$ où $\Re(\bold{x})$ et $\Im(\bold{x})$ sont gaussiens et $e^{i\phi}\bold{x}  \overset{d}{=} \bold{x}, \forall \phi \in [0,2\pi[$</li>
+
+
+			<li>Densité de probabilité (définie si $\Sigma_{xx}$ est inversible)
+				<center style="margin-top:0.3em; margin-bottom:0.3em;">$$
+				p(\bold{x})=\frac{1}{\pi^{M}\det(\Sigma_{xx})}
+				\exp((\bold{x}-\mu_x)^{\mathsf{H}}\Sigma_{xx}^{-1}(\bold{x} - \mu_x))$$</center>
+			</li>
+			<li>On notera $\bold{x} \sim \mathcal{N}_{\mathbb{C}}^{M}(\mu_x, \Sigma_{xx})$ et $\bold{x} \sim \mathcal{N}_{\mathbb{C}}^{M}(\Sigma_{xx})$ si $\mu_x=0$ </li>
+			<li>Si $\mu_x=0$ $\implies$ vecteur gaussien complexe circulaire centré (GCCC)</li>
+				<!-- <h3 style='margin-top:0.5em;'>Cumulants</h3>
+				<ul>
+					<li style='margin-top:-0.8em;'>Définition: $
+						\log\left(\phi_x(\bold{f})\right) =
+						 \sum\limits_{n=1}^{+\infty}\frac{(-2i\pi)^n}{n!}\sum\limits_{k_1=1}^M\dots\sum\limits_{k_n=1}^M
+						 \kappa^{n}_{k_{1}\dots k_{n}}[\bold{x}]f_{k_1}\dots f_{k_n}$</li>
+					<li>$\kappa^n[\bold{x}]$ est un tenseur d'ordre $n$ de coefficients $\kappa^{n}_{k_{1}\dots k_{n}}[\bold{x}]$</li>
+					<li>$\kappa^1[\bold{x}]$ est la moyenne, $\kappa^2[\bold{x}]$ est la matrice de covariance</li>
+					<li> $p(\bold{x})$ est symmétrique $\implies$ $\kappa^{n}[\bold{x}]=0, \forall n~ \mathrm{impair}$</li>
+					<li>Le rapport $\kappa^4_{k,k,k,k}[\bold{x}]/\kappa^2_{k,k}[\bold{x}]$ est appelé le "kurtosis"</li>
+				</ul> -->
+		</section>
+
+	
+	<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+		<h2 id='coverh2'>II - Séparation de sources (ICA) </h2>
+	</section>	
+
+	<section>
+		<h2>Séparation de sources aveugle (BSS) (1/2)</h2>
+		<h3 style='margin-top:0.5em;'>Modèle d'observation</h3>
+		<ul>
+			<li> Mélange linéaire instantané :
+				<center>$$\forall t, \bold{x}(t)=\bold{A}\bold{s}(t)$$</center>
+				$\quad\rightarrow\bold{A}\in\mathbb{R}^{M\times K}$: "matrice de mélange"
+			</li>
+			<li>
+				Les sources sont supposées iid. :
+				<center>$$p(\{s_n(t)\}_{n,t})=\prod\limits_{n=1}^{N}\prod\limits_{t=1}^{T}p_n(s_n(t))$$</center>
+			</li>
+		</ul>
+		<div class="remarque" style='margin-top:0.5em;'> Problème de la BSS : estimer $\bold{A}$ et les $\bold{s}(t)$ étant donné $\bold{x}(t)$ </div>
+		<aside class="notes">
+			<ul><li> BSS: we know very little about the sources</li>
+				<li>just assumed to be statistically independent</li>
+				<li>e.g. denoising application the background environmental noise and speaker are in general independent</li>
+	<li>IID assumption:ignore power variation over time or spectral dynamics</li>
+			</ul>
+		</aside>
+	
+	 </section>
+	
+	
+	 <section>
+		<h2>Séparation de sources aveugle (BSS) (2/2)</h2>
+		<h3 style='margin-top:0.5em;'>Non-mixing matrix</h3>
+		<ul>
+		<li>
+			Une matrice $\bold{C}$ de dimension $N\times N$ est <b>non-mixing</b> ssi. elle admet une unique entrée non-nulle pour chaque ligne et chaque colonne.
+		</li>
+		<li>
+			Si $\tilde{\bold{s}}(t) = \bold{C}\bold{s}(t)$ et $\tilde{\bold{A}}=\bold{A}\bold{C}^{-1}$, alors $\bold{x}(t)= \tilde{\bold{A}}\tilde{\bold{s}}(t)$
+			est une autre décomposition admissible des observations. </br>
+			$\quad\rightarrow$ Les sources peuvent donc être estimé à une <b>permutation</b> et <b>à un facteur multiplicatif</b> près.
+		</li>
+		</ul>
+		<aside class="notes">
+			<ul><li> BSS: can be really find $s$ and $A$ from $x$</li>
+				<li>$P$ permutation matrix, then $\tilde{A} = AP^{-1}$ and $\tilde{s}(t) = Ps(t)$ also works</li>
+				<li>$D$ inversible diagonal matrix, then $\tilde{D} = DP^{-1}$ and $\tilde{s}(t) = Ds(t)$ also works</li>
+				<li>At least scale and permutation indetermacies</li>
+	<li>product of $P$ and inversible diagonal matrix $D$</li>
+			</ul>
+		</aside>
+	 </section>
+
+	 <section>
+		<h2>Séparation de sources linéaire</h2>
+		<h3 style='margin-top:0.5em;'>Model</h3>
+		<ul>
+		<li>
+			Soit
+			<center>$$\bold{y}(t)=\bold{B}\bold{x}(t)$$</center>
+			$\quad\rightarrow\bold{B}\in\mathbb{R}^{N\times M}$: "matrice de séparation"
+		</li>
+	  </ul>
+			<h3 style='margin-top:0.5em;'>Faisabilité</h3>
+	
+			<ul>
+				<li>
+	La séparation linéaire est faisable si $\mathrm{rank}(\bold{A})=N$
+				</li>
+		<li> Sous les conditions précédentes, on obtient :
+		<center style="margin-top:0.5em; margin-left:1.5em;">$$\bold{B} =
+			\begin{cases}
+			\bold{B} = \bold{A}^{-1} & \mathrm{si} ~ M=N \\
+			\bold{B} = \bold{A}^{\dagger} = (\bold{A}^\top\bold{A})^{-1}\bold{A}^\top & \mathrm{si} ~ M>N  \quad\quad \texttt{(pseudo-inverse)}\\
+			\emptyset & \mathrm{si} ~ M< N
+			\end{cases}
+			$$</center>
+		</li>
+		</ul>
+	<div class="remarque" style='margin-top:0.5em;'> Dans le cas de la BSS, la matrice $\bold{A}$ est inconnue </div>
+	 </section>
+
+	 <section>
+		<h2>Indepedent component analysis (ICA) (1/2) </h2>
+		<h3 style='margin-top:0.5em;'>Problem Statement</h3>
+		<ul>
+		   <li>
+			   $\bold{A}$ est inconnue et on cherche $\bold{B}$ qui rendent les $y_n(t)$ indépendants (ICA)
+		</li>
+		<li>
+			On obtient l'équation :
+			<center>$$\bold{y}(t) = \bold{C}\bold{s}(t)$$</center>
+			$\quad\rightarrow$ où $\bold{C}=\bold{BA}$ </br>
+			$\quad\rightarrow$ $\bold{C}$ est non-mixing $\implies$ le problème est résolu.
+		</li>
+		</ul>
+		   <img src="figures/images/ICA.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=40%>
+		 <!-- <h3 style='margin-top:0.5em;'>Theorem (identifiability)</h3>
+		   <ul>
+			   <li>
+				   Let $\{s_k(t)\}_{k=1\dots K}$ be $K$ IID sources, among which at most one is Gaussian and:
+				   <center>$$
+					   \bold{y}(t) = \bold{C}\bold{s}(t)
+				   $$</center>
+				   with $\bold{C}$ inversible (i.e. $M \geq K$).
+			   </li>
+		   </ul>
+		   <div class="remark" style='margin-top:0.5em;'> If signal $y_k(t)$  are independent, then $\bold{C}$ is non-mixing</div> -->
+		</section>
+	   
+		<section>
+		<h2>Indepedent component analysis (ICA) (2/2)</h2>
+		   <img src="figures/images/ICA.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=40%>
+	   
+	 <div class="exemple">
+		<div id="title"> Théorème [d'identifiabilité] </div>
+		Soit $\{s_n(t)\}_{n=1\dots N}$ les $N$  sources iid., avec au plus une source Gaussienne et :
+		<center>$$
+			\bold{y}(t) = \bold{C}\bold{s}(t)
+		$$</center>
+		avec $\bold{C}$ inversible (i.e. $M \geq N$).
+	</li>
+</ul>
+<p>Si les $y_n(t)$  sont indépendants, alors $\bold{C}$ est non-mixing</p>
+	 </div>
+
+		</section>
+	   
+		<section>
+		<h2>Blanchiment (1/3)</h2>
+		<ul>
+			<li> Modèle :<br>
+				$
+				\begin{cases}
+				\mathbb{E}[\bold{s}(t)]=0 \\
+				\bold{R}_{ss}(\tau) = \mathbb{E}[\bold{s}(t+\tau)\bold{s}(t)^\top] = \mathrm{diag}(r_{s_k}(\tau))
+				\end{cases} \quad\texttt{(processus centrée SSL)}
+				$
+			</li>
+			<li> <b>Problème canonique (PC)</b>: on suppose que  $\Sigma_{ss}=\bold{R}_{ss}(0)=\bold{I}$</li>
+			<li>
+				Alors
+				<center>$$
+			\Sigma_{xx} = \bold{A}\Sigma_{ss}\bold{A}^\top =\bold{A}\bold{A}^\top
+				$$</center>
+				$\quad\rightarrow$ $\bold{A}$ est une racine carré de la matrice $\bold{\Sigma}_{xx}$
+			 </li>
+
+		</ul>
+		<aside class="notes">
+			<ul><li> Two step for ICA the first one is to decorrelate the observed mixture signals</li>
+			   <li>The second one is to make the whitened signals independent</li>
+				<li> CP: the sources signals are IID so Diagonal assumption is OK</li>
+				<li>Moreover, we know we can retrieve only up to a multiplicative factor</li>
+			</ul>
+		</aside>
+		</section>
+	   
+		<section>
+		<h2>Blanchiment (2/3)</h2>
+		 <h3 style='margin-top:0.5em;'>Decorrelation (Blanchiment) de $\Sigma_{xx}$</h3>
+		  <ul>
+				<li>
+					$\Sigma_{xx}$ est diagonalisable dans une base orthonormée :
+					<center>$$
+					   \Sigma_{xx} = \bold{Q}\Lambda^2\bold{Q}^\top
+					$$</center>
+	   
+					$\quad\rightarrow \Lambda= \mathrm{diag}(\lambda_1, \dots, \lambda_M)$
+					avec $\lambda_1 \geq \dots \geq \lambda_N >\lambda_{N+1}  = \dots =\lambda_{M} = 0$
+					$\quad\quad (\mathrm{rank}(\Sigma_{xx}) = N)$
+				</li>
+				<li>
+					Soit $\bold{S} = \bold{Q}_{(:, 1:N)}\Lambda_{(1:N, 1:N)} \in \mathbb{R}^{M\times N}$ alors $\Sigma_{xx} = \bold{S}\bold{S}^\top$
+				</li>
+				<li>
+					Soit $\bold{W} = \bold{S}^{\dagger}, \bold{z}(t) = \bold{W}\bold{x}(t)$ alors :
+					 <center>$$
+					   \begin{cases}
+					   \mathbb{E}[\bold{z}(t)] = 0, \\
+					   \Sigma_{zz} = \bold{W}\Sigma_{xx}\bold{W}^\top = \bold{I}
+					   \end{cases}\quad\quad\texttt{(z est dit "blanc")}
+					   $$</center>
+				</li>
+			</ul>
+			<aside class="notes">
+			   <ul><li> $\bold{W}$ is a whitening matrix</li>
+			   </ul>
+			</aside>
+		</section>
+	   
+		<section>
+		<h2>Blanchiment (3/3)</h2>
+		 <h3 style='margin-top:0.5em;'>Conclusion</h3>
+		  <ul>
+				<li>
+			  Sans perte de généralité : $\bold{U} := \bold{WA}$ est une matrice de rotation ($\bold{UU}^\top = \bold{I}$)
+				</li>
+				<li>
+				   Alors :
+				   <center>$$
+					   \bold{y}(t) = \bold{U}^\top \bold{z}(t) = \bold{U}^\top\bold{W}\bold{x}(t) = \bold{s}(t)
+				   $$</center>
+				</li>
+				<li>
+					On peut supposer que $\bold{B} = \bold{U}^\top\bold{W}$ où $\bold{U}$ est une matrice de rotation
+			   </li>
+			   <li>De plus  $\forall \tau \in \mathbb{Z}, \bold{R}_{zz}(\tau) = \bold{U}\bold{R}_{ss}(\tau)\bold{U}^\top$</li>
+			</ul>
+				<img src="figures/images/whitening_ICA.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=40%>
+				<div class="remarque" style='margin-top:0.5em; margin-bottom:0.5em;'>
+					La diagonalisation jointe de $\bold{R}_{zz}(\tau)$ pour plusieurs $\tau$ va donner $\bold{U}$
+				</div> 
+				
+				<aside class="notes">
+				<ul><li> In fact $\bold{U}$ is an orthonormal matrix but because of the multiplicative scalar uncertainty, we assume that $\det(U)=1$</li>
+			   </ul>
+			 </aside>
+		</section>
+
+		<section>
+			<h2>Diagonalisation jointe</h2>
+			 <div class="exemple">
+				<div id="title">Théorème [d'unicité de la diagonalisation jointe]</div>
+
+				Soit $\{\bold{R}_{zz}(\tau)\}_{\tau} \in \mathbb{R}^{N\times N}$ telles que :
+				<center>$$
+				\bold{R}_{zz}(\tau) = \bold{U}\bold{R_{ss}(\tau)}\bold{U}^\top
+				$$</center>
+				$\bold{U}$ est unique $\Leftrightarrow \forall 1\leq k \neq l \leq K~ \exists \tau, r_{s_k}(\tau) \neq r_{s_l}(\tau)$	
+			 </div>
+
+
+
+
+			 <h3 style='margin-top:0.5em;'>Méthode de diagonalisation jointe</h3>
+			 <ul>
+				 <li> Minimiser :
+					 $J(\bold{U}) = \sum_\tau\mid\mid \bold{U}^\top\bold{R}_{zz}(\tau)\bold{U} - \mathrm{diag}(\bold{U}^\top\bold{R}_{zz}(\tau)\bold{U}) \mid\mid_{F}^2$
+				</li>
+				<li>Parametrisation de $\bold{U}$ comme des rotations de  Givens et descente de gradient par coordonnées</li>
+			 </ul>
+			 <div class="references" style="float:left; margin-top:0.2em;">
+				<ul><li>A. Belouchrani, "A blind source separation technique using second-order statistics," in IEEE TSP (1997)</li>
+			</ul>
+		</div>
+			 <aside class="notes">
+				 <ul><li>$U$ is unique up to a non-mixing matrix</li>
+					 <li> We relax the source model that it is only identifiable from its second order statistic.</li>
+				 </ul>
+				</aside>
+			</section>
+
+		<section>
+			<h2>Algorithme Second Order Blind Identification (SOBI)</h2>
+			<ol>
+				<li>Estimation de $\Sigma_{xx}$</li>
+				<li>Diagonalisation: $\Sigma_{xx} = \bold{Q}\Lambda^2\bold{Q}^\top$</li>
+				<li>Calculer $\bold{S}=\bold{Q}_{(:, 1:K)}\Lambda_{(1:K, 1:K)}$ and $\bold{W}= \bold{S}^{\dagger}$</li>
+				<li>Blanchiement des données : $\bold{z}(t) = \bold{W}\bold{x}(t)$</li>
+				<li>Estimation de $\bold{R}_{zz}(\tau)$ pour différentes valeurs $\tau$</li>
+				<li>Approximation de la diagonalisation jointe $\bold{R}_{zz}(\tau)$ dans une base commune $\bold{U}$</li>
+				<li>Estimation des sources via $\bold{y}(t) = \bold{U}^{\top}\bold{z}(t)$</li>
+			</ol>
+			</section>
+
+			<section>
+				<h2>Exemple de SOBI sur différents mélanges (1/2)</h2>
+				<img src="figures/images/config_1_sobi.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=60%>
+				<div class="multiCol" style="margin-top:0.1em">
+					<div class="col">
+						<label for="no_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp parole bruité<br>
+						</label>
+							<audio id="no_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/nsp_SOBI.wav"/>
+								</audio>
+
+					</div>
+					<div class="col">
+						<label for="cl_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp parole (SOBI)<br>
+						</label>
+							<audio id="cl_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/nsp_K=1_SOBI.wav"/>
+								</audio>
+
+
+					</div>
+					<div class="col">
+						<label for="cl_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp bruit (SOBI)<br>
+						</label>
+							<audio id="cl_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/nsp_K=2_SOBI.wav"/>
+								</audio>
+
+
+					</div>
+		
+			</section>
+
+			<section>
+				<h2>Exemple de SOBI sur différents mélanges (2/2)</h2>
+				<img src="figures/images/config_2_sobi.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=60%>
+				<div class="multiCol" style="margin-top:0.1em">
+					<div class="col">
+						<label for="no_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp 3 locuteurs<br>
+						</label>
+							<audio id="no_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/multi_sp_SOBI.wav"/>
+								</audio> <br>
+
+				    
+						<label for="cl_sp">
+							&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp locuteur 2 (SOBI)<br>
+							</label>
+								<audio id="cl_sp" controls>
+								<source
+										type="audio/mpeg"
+										src="multimedia/audio/multi_sp_K=2_SOBI.wav"/>
+									</audio>
+
+					</div>
+					<div class="col">
+						<label for="cl_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsplocuteur 1 (SOBI)<br>
+						</label>
+							<audio id="cl_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/multi_sp_K=1_SOBI.wav"/>
+								</audio> <br>
+					
+						<label for="cl_sp">
+							&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp locuteur 3 (SOBI)<br>
+							</label>
+								<audio id="cl_sp" controls>
+								<source
+										type="audio/mpeg"
+										src="multimedia/audio/multi_sp_K=3_SOBI.wav"/>
+									</audio>
+			
+
+
+					</div>
+
+
+
+
+
+		
+			</section>		
+	<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+		<h2 id='coverh2'>II/4 - Traitement du signal audio : séparation de sources (mélange convolutif) </h2>
+	</section>	
+	<section>
+		<h2>Source images</h2>
+		<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+		Modèle de mélange instantané : non adapté aux mélanges réels
+		</div>
+	<h3 style='margin-top:0.5em;'> Mélange de sources images</h3>
+		<ul>
+	
+			<li>Soit $\bold{x}_n(f,t) \in \mathbb{R}^M$ la <b>source image</b> de $s_n(f,t)$<br>
+				$\quad\rightarrow$ on reçoit un signal multicanal ssi la source $s_n(f,t)$ est active
+			</li>
+			<li>
+				Modèle de mélange : $\bold{x}(f,t) = \sum_{k=1}^K \bold{x}_n(f,t)$
+			</li>
+	
+		</ul>
+	<h3 style='margin-top:0.5em;'> Décomposition du problème de séparation de sources</h3>
+	<ul>
+		<li> <b>Séparation</b> : estimer $\bold{x}_n(f,t)$ à partir du mélange $\bold{x}(f,t)$</li>
+		<li> <b>Déconvolution</b> : estimer $s_n(f,t)$ à partir de la source image $\bold{x}_n(f,t)$</li>
+	</ul>
+	</section>
+
+	<section>
+		<h2>Représentation temps-fréquence (TF)</h2>
+		<h3 style='margin-top:0.5em;'>Motivation</h3>
+		<ul>
+
+		<li>
+		 Adéquat pour étudier les modèles convolutifs et/ou sous-déterminés
+		</li>
+		</ul>
+			<h3 style='margin-top:0.5em;'>Banc de filtre de la TFCT</h3>
+			<ul>
+				<li> Décomposition dans $F$ sous bandes et décimation en facteur $H \leq F$</li>
+				<li>$H$ est appelée la hop-size</li>
+				<li>filtres d'analyse $h_f$ et filtres de synthèses $g_f$</li>
+				<li>Représentation TF du mélange : $x_m(f,t) = (h_f\ast x_m)(tH)$</li>
+				<li><b> Reconstruction parfaite</b> : $x_m(\tau) = \sum_{f=1}^F\sum_{t\in \mathbb{Z}} g_f(\tau-tH)x_m(f,t)$
+				</li>
+			</ul>
+			<div class="remarque" style='margin-top:0.5em; margin-bottom:0.5em;'>
+			 Alors $\forall f,n ~ \bold{x}(f,t) = \bold{As}(f,t)\quad\texttt{(mélange linéaire instantané)}$
+		 </div>
+		 <aside class="notes">
+			<ul>
+				<li> perfect reconstruction filterbank: MDCT and STFT</li>
+				<li>$T$ is called the hopsize</li>
+				<li>We have the same procedure for the sources</li>
+							<li>Interestingly, the linear instantaneous mixture is unchanged</li>
+			</ul>
+		 </aside>
+	</section>
+
+	<section>
+		<h2>Approche temps-fréquence</h2>
+			<h3 style='margin-top:0.5em;'> modèle de mélange et approximation à bande étroite </h3>
+			<ul>
+				<li>$x_m(t) = \sum_{n=1}^{N}(a_{mn} \ast s_n)(t)$,</li>
+				<li>La réponse impulsionnelle de $a_{mk}$ est courte p/r à la longueur de la fenêtre</li>
+				<li>$\forall m,n,f, a_{mn}(\nu)$ varie lentement comparé à $h_f(\nu)$</li>
+			</ul>
+			<h3 style='margin-top:0.5em;'>Approximation du modèle de mélange convolutionnel</h3>
+			<ul>
+				<li>$x_m(f,t)=\sum_{n=1}^N a_{mn}(f)s_n(f,t)$ i.e. $\bold{x}(f,t)=\bold{A}(f)\bold{s}(f,t)$<br>
+						$\quad\rightarrow$ $F$ mélange de modèles instantanés dans chaque sous-bande fréquentielle<br>
+						$\quad\rightarrow$ on peut utiliser une méthode d'ICA dans chaque sous-bande<br>
+
+				</li>
+	
+			</ul>
+			<div class ="remarque">Problème : si on utilise un algorithme de type ICA, on a une infinité de solutions (on doit constraindre le modèle)</div>
+	</section>
+
+	<section>
+		<h2>Indéterminations</h2>
+		<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+		Indéterminations (permutations et facteurs multiplicatifs) dans les matrices $\bold{C}(f)$
+		</div>
+		<ul>
+		<li>$\forall n$, identifier les index $n, f$ tel que $\forall f, y_{k_f}(f,t)=c_{k_f,k}s_k(f,t)$</li>
+		<li>identifier les facteurs multiples $c_{k_f,k}$</li>
+		</ul>
+		<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+		Une infinité de solutions $\implies$ besoin de contraindre le modèle
+		</div>
+		<h3 style='margin-top:0.5em;'> Hypothèses sur le mélange ou les sources</h3>
+		<ul>
+		<li>modèle continue le long de l'axe fréquentielle des $a_{mk}(f)$ <br>
+				$\quad\rightarrow$ modèle comme formation de voie ou modèle anéchoïque
+		</li>
+		<li> similarité sur l'axe temporelle des $p_n(f,t)$ (ou modèle NMF. Plus tard ! )
+		</li>
+
+		</ul>
+		<aside class="notes">
+		 <ul><li>$a_{mk}$: impulse response of a stable filter</li>
+		 </ul>
+		</aside>
+</section>
+
+<section>
+	<h2>Modèles continues de diffusion</h2>
+	<h3 style='margin-top:0.5em;'>Formation de voies</h3>
+	<ul>
+	<li>Hypothèses : ondes planes, champ lointain, pas de réverbération, antenne linéaire</li>
+	<li>Modèle : $a_{mn}(f)=e^{-2i\pi f\tau_{mn}}$ où $\tau_{mn}=\frac{d_m}{c}\sin(\Theta_n)$</li>
+	<li>Paramètres : positions $d_m$ des capteurs et les angles $\Theta_n$ des sources</li>
+	</ul>
+
+	<h3 style='margin-top:0.5em;'>Modèle anéchoïque</h3>
+	<ul>
+	<li>Hypothèses : source ponctuelle, pas de réverbération</li>
+	<li>Modèle : $a_{mn}(f)=\alpha_{mn}e^{-2i\pi f\tau_{mn}}$ avec $\tau_{mn}=\frac{r_{mn}}{c}$ et $\alpha_{mn} = \frac{1}{\sqrt{4\pi}r_{mn}}$</li>
+	<li>Paramètres : distances $r_{mn}$ entre les micros et les sources</li>
+	</ul>
+	<aside class="notes">
+	 <ul><li>In practice, do not represent a real acoustic mixtures (but solve the multiple permutation problem)</li>
+	 </ul>
+	</aside>
+</section>
+
+
+<section>
+	<h2>Separation via un filtre non stationnaire</h2>
+	Considérons $\bold{y}(f,t) = \bold{B}(f,t)\bold{x}(f,t)$ où $\bold{B}(f,t) \in \mathbb{C}^{N\times M}$
+	<h3 style='margin-top:0.5em;'>Estimation via l'erreur moyenne quadratique</h3>
+	<ul>
+		<li>On cherche $\bold{B}(f,t)$ qui minimise $\mathbb{E}[\mid\mid\bold{y}(f,t)-\bold{s}(f,t)\mid\mid^2_{2} ]$</li>
+		<li>Sol.: $\bold{B}(f,t) = \Sigma_{sx}(f,t)\Sigma_{xx}(f,t)^{-1}~\texttt{(Filtre de Wiener)}$<br>
+				$\quad\rightarrow \Sigma_{xx}(f,t) = \bold{A}(f)\Sigma_{ss}(f,t)\bold{A}(f)^{\mathrm{H}},
+				\Sigma_{sx}(f,t) = \Sigma_{ss}(f,t)\bold{A}(f)^{\mathrm{H}}
+				$
+		</li>
+		<li>
+			$\bold{x}(f,t)=\bold{A}(f)\bold{y}(f,t)$ (reconstruction exacte)
+		</li>
+	</ul>
+	<h3 style='margin-top:0.5em;'>cas particulier : cas monocanal</h3>
+	<ul>
+		<li>sans perte de généralité, on définit $\bold{A}(f)=\left[\begin{array}{ccc}
+1 & \dots & 1\\
+0 & \cdots & 0\\
+\vdots & \cdots & \vdots
+\end{array}\right]$ </li>
+		<li> Alors $y_n(f,t) = \frac{p_n(f,t)}{\sum_{n^\prime=1}^Np_{n^\prime}(f,t)} x(f,t) ~~~~\texttt{(Filtre de Wiener monocanal)}$
+		</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Formalisme probabiliste pour la séparation de sources images</h2>
+	Prenons cette fois-ci le modèle de mélange de sources images :
+	<center>
+		$$
+		\bold{x}(f,t) = \sum_{n=1}^{N}\bold{x}_n(f,t)
+		$$
+	</center>
+	 $\forall n,f,t$ indépendances et suivent une GCCC :
+	<center>
+		$$
+		\bold{x}_n(f,t) \sim \mathcal{N}_{\mathbb{C}}^{M}(\Sigma_{n}(f,t))
+		$$
+	</center>
+Alors, par indépendance et stabilité par sommation on a que :
+<center>
+	$$
+	\bold{x}(f,t) \sim \mathcal{N}_{\mathbb{C}}^{M}(\sum_{n=1}^{N}\Sigma_{n}(f,t) := \Sigma(f,t))
+	$$
+</center>
+
+On peut montrer que : 
+<center>
+	$$
+	\bold{x}_n(f,t) \mid \bold{x}(f,t) \sim \mathcal{N}_{\mathbb{C}}^{M}(\mu_{\bold{x} \mid \bold{n}}, \Sigma_{\bold{x} \mid \bold{n}})
+	$$
+</center>
+
+avec <center>
+	$$\mu_{\bold{x} \mid \bold{n}} = \Sigma_{n}(f,t) \Sigma(f,t)^{-1}\bold{x}(f,t) ~~\texttt{(Filtrage de Wiener)}$$
+	$$\Sigma_{\bold{x} \mid \bold{n}} = \mu_{\bold{x} \mid \bold{n}}\mu_{\bold{x}  \mid \bold{n}}^{\mathsf{H}} +   (\bold{I_{M}} - \Sigma(f,t)^{-1})\Sigma_{n}(f,t) ~~\texttt{(covariance conditionnelle)}$$
+</center>
+<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+	En soit, le modèle probabiliste GCCR ou l'EMQ sont ici équivalents.
+	</div>
+</section>
+
+<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+	<h2 id='coverh2'>IV - Espérance-Maximisation</h2>
+</section>	
+<section>
+	<h1>Motivations, principe du maximum de vraisemblance</h1>
+	<ul>
+		<li>On a maintenant des modèles pour l'audio (+ des connaissances en optimisation)</li>
+		<li>Cependant pas d'estimation des paramètres</li>
+		<li>Un modèle probabiliste a été cependant établi (modèle Gaussien)</li>
+		<div class="remarque" style='margin-top:0.5em; margin-bottom:0.5em;'>
+			Comment exploiter ce modèle pour estimer les matrices de covariances ?
+			</div>
+	</ul>
+	$\rightarrow$ <b>Solution : </b> Exploiter le maximum de vraisemblance ! <br>
+	$\rightarrow$ <b>Idée :</b> trouver les paramètres d'un modèle de probabilité les plus "vraisemblables" pour expliquer des données 
+	observées.
+	<ul>
+		<li>Dans notre cas, on avait $\bold{x}(f,t)$ des GCCC </li>
+		<li>Notons $\bold{X} = \left\{\bold{x}(f,t)\right\}_{f,t=1}^{F,T}$ et $\Theta=\{\Sigma{(f,t)}\}_{f,t=1}^{F,T}$ les paramètres.
+		<li>Par indépendance $p(\bold{X}\mid \Theta) = \prod_{f,t=1}^{F,T} p(\bold{x}(f,t)\mid \Sigma(f,t))$</li>
+	</ul>
+	<br>
+	<p>Ici on a le problème d'optimisation :</p>
+	<center>
+    $$
+	\Theta^\star = \underset{\Theta}{\text{argmax}} \log(p(\bold{X}\mid \Theta))
+	$$
+	</center>
+
+	<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+		Ce problème est appelé <b>le principe du maximum de (log)-vraisemblance (ML)</b>
+		</div>
+</section>
+
+<section>
+ <h1>Motivations, limites du modèle</h1>
+ On a cependant à faire à un certain nombre de limitations que voici:
+ <ul>
+	<li>Les paramètres que l'on cherche (considérés comme "cachés") sont également les $\Sigma_n(f,t)$</li>
+	<li>Le problème d'optimisation précédent n'est pas forcément trivial à résoudre (non convexité etc.)</li>
+	<li>En réalité, on a un échantillon TF pour estimer chaque $\Sigma_n(f,t)$ (on verra que la MNMF permet de résoudre se problème)</li>
+ </ul>
+
+ <div class="remarque" style='margin-top:0.5em; margin-bottom:0.5em;'>
+	L'algorithme d'espérance-maximisation va nous permettre de résoudre partiellement les deux premiers points.
+	</div>
+
+	Dans la suite, on notera $L(\Theta) = \log(p(\bold{X} \mid \Theta)$ (à noter que le log est une fonction croissante. donc cela ne change pas le problème)
+</section>
+
+   <section>
+	<h1>Espérance-Maximisation (EM) (1/4)</h1>
+	L'EM est un algorithme itératif qui met à jour les $\Theta$. Il permet d'effectuer la ML en présente de données cachées (latentes) $\bold{Z}$ ou de données manquantes.
+	<ul>
+		<li>Ces données cachées peuvent être définies pour une estimation des $\Theta$ plus accessible.</li>
+		<li>On note $\Theta_n$ les paramètres estimés à l'itération $n$</li>
+		<li>Comme on veut maximiser $L(\Theta)$, on voudrait une mise à jour des $\Theta$ tel que : 
+			<center>
+				$$
+				L(\Theta) > L(\Theta_n)
+				$$
+			</center>
+
+		</li>
+		<li>De manière équivalente, on veut maximiser la différence :
+
+			<center>
+				$$
+				L(\Theta) - L(\Theta_n) = \log(P(\bold{X} \mid \Theta)) - \log(P(\bold{X} \mid \Theta_n))
+				$$
+			</center>
+		</li>
+		<li>
+			La formule des probabilité totale nous permet d'écrire :
+			<center>
+			$$
+			L(\Theta) - L(\Theta_n)  =
+			 \log\sum_{\bold{z} \in \bold{Z}} P(\bold{X} \mid \bold{z}, \Theta)P(\bold{z} \mid \Theta) - \log(P(\bold{X} \mid \Theta_n))
+			 
+		    $$
+		</center>
+		</li>
+		<li>L'inégalité de Jensen ($\sum \lambda_i = 1, \lambda_i,  \geq 0 \forall i, \log(\sum\lambda_i x_i) \geq \sum \lambda_i \log(x_i)$) 
+			s'applique ici (car les $\lambda_i = P(\bold{z} \mid \bold{X}, \Theta_n) \geq 0$ et $\sum_i \lambda_i = 1$) </li>
+	</ul>
+
+   </section>
+
+   <section>
+	<h1>Espérance-Maximisation (EM) (2/4)</h1>
+	En continuant de dérouler les calculs, on obtient : 
+	$$\begin{aligned}
+L(\Theta)-L\left(\Theta_n\right) & =\log \sum_{\mathbf{z}} \mathcal{P}(\mathbf{X} \mid \mathbf{z}, \Theta) \mathcal{P}(\mathbf{z} \mid \Theta)-\log \mathcal{P}\left(\mathbf{X} \mid \Theta_n\right) \\
+& =\log \sum_{\mathbf{z}} \mathcal{P}(\mathbf{X} \mid \mathbf{z}, \Theta) \mathcal{P}(\mathbf{z} \mid \Theta) \cdot \frac{\mathcal{P}\left(\mathbf{z} \mid \mathbf{X}, \Theta_n\right)}{\mathcal{P}\left(\mathbf{z} \mid \mathbf{X}, \Theta_n\right)}-\log \mathcal{P}\left(\mathbf{X} \mid \Theta_n\right) \\
+& =\log \sum_{\mathbf{z}} \mathcal{P}\left(\mathbf{z} \mid \mathbf{X}, \Theta_n\right)\left(\frac{\mathcal{P}(\mathbf{X} \mid \mathbf{z}, \Theta) \mathcal{P}(\mathbf{z} \mid \Theta)}{\mathcal{P}\left(\mathbf{z} \mid \mathbf{X}, \Theta_n\right)}\right)-\log \mathcal{P}\left(\mathbf{X} \mid \Theta_n\right) \\
+& \geq \sum_{\mathbf{z}} \mathcal{P}\left(\mathbf{z} \mid \mathbf{X}, \Theta_n\right) \log \left(\frac{\mathcal{P}(\mathbf{X} \mid \mathbf{z}, \Theta) \mathcal{P}(\mathbf{z} \mid \Theta)}{\mathcal{P}\left(\mathbf{z} \mid \mathbf{X}, \Theta_n\right)}\right)-\log \mathcal{P}\left(\mathbf{X} \mid \Theta_n\right) \\
+& =\sum_{\mathbf{z}} \mathcal{P}\left(\mathbf{z} \mid \mathbf{X}, \Theta_n\right) \log \left(\frac{\mathcal{P}(\mathbf{X} \mid \mathbf{z}, \Theta) \mathcal{P}(\mathbf{z} \mid \Theta)}{\mathcal{P}\left(\mathbf{z} \mid \mathbf{X}, \Theta_n\right) \mathcal{P}\left(\mathbf{X} \mid \Theta_n\right)}\right) \\
+& := \Delta\left(\Theta \mid \Theta_n\right)
+\end{aligned}$$
+Si on pose alors : $l (\Theta \mid \Theta_n) := \Delta\left(\Theta \mid \Theta_n\right) + L(\Theta_n)$. On a (et on peut montrer) :
+<center>
+	$$
+	L(\Theta) \geq l(\Theta \mid \Theta_n) \quad\text{et}\quad l(\Theta_n \mid \Theta_n) = L(\Theta_n)
+	$$
+</center>
+   </section>
+
+   <section>
+	<h1>Espérance-Maximisation (EM) (3/4)</h1>
+	<ul>
+		<li> Rappel : On cherche $\Theta$ qui maximise $L(\Theta)$</li>
+		<li>Quand $\Theta$ augmente $l(\Theta \mid \Theta_n)$, il augmente $L(\Theta)$</li>
+		<li>L'algorithme EM alors cherche un $\Theta$ tel que $l(\Theta \mid \Theta_n)$ est maximum</li>
+		<li>Cette nouvelle valeur est alors notée $\Theta_{n+1} :=\underset{\Theta}{\text{argmax}}(l(\Theta \mid \Theta_n))$</li>
+	</ul>
+	
+	<p>
+		<center><figure>
+			<img src="figures/images/fonction_EM.png" width="80%">
+			<figcaption><em>Illustration de l'algorithme EM.</em></figcaption>
+			</figure>
+			</center>
+		</p>
+</section>
+
+<section>
+	<h1>Espérance-Maximisation (EM) (4/4)</h1>
+	On peut alors montrer que :
+	<center>
+		$$\begin{aligned}
+		\Theta_{n+1} &:=\underset{\Theta}{\text{argmax}}(l(\Theta \mid \Theta_n)) \\
+		 &= \underset{\Theta}{\text{argmax}}\left[\sum_{\bold{z}}P(\bold{z} \mid \bold{X}, \Theta_n)\log P(\bold{X},\bold{z} \mid \Theta)\right] \\
+		 &= \underset{\Theta}{\text{argmax}}\left[\mathbb{E}_{\bold{Z} \mid \bold{X}, \Theta_n} \log(P(\bold{X},\bold{z} \mid \Theta))\right]
+		\end{aligned}
+		$$
+	</center>
+
+	On voit alors les deux étapes essentielles de l'algorithme EM apparaître :
+	<div class="exemple">
+	<p><ol>
+		<li>$E$-step : Déterminer l'espérance conditionelle $\mathbb{E}_{\bold{Z} \mid \bold{X}, \Theta_n} \log(P(\bold{X},\bold{z} \mid \Theta))$</li>
+		<li>$M$-step : Maximiser l'expression précédente en fonction de $\Theta$</li>
+	</ol></p>
+</div>
+	<div class="remarque">
+		En soit, on a "troqué" une maximisation de vraisemblance par celle d'une fonction $l$. L'idée est de proposer une fonction $l$ simple à maximiser
+		et qui fait apparaître des variables latentes interprétables ou qui sont essentielles afin de résoudre le problème.
+	</div>
+	<p>
+	<div class="references">
+		<ul>
+			<li>A. P. Dempster, N. M. Laird, and D. B. Rubin. Maximum likelihood from incomplete data via the EM algorithm. Journal of the Royal Statistical Society:
+				Series B, 39(1):1–38, November 1977.</li>
+		</ul>
+	</p>
+	</div>
+</section>
+
+<section>
+	<h1 style="margin-top:-1em;">Application : famille exponentielle (1/3)</h1>
+	Supposons un jeu de données complet ($x_i, z_j$) i.i.d. de cardinal $N$ qui appartient à une famille exponentielle canonique :
+	<center>
+		$$
+		P(x_i, z_j \mid \bold{\eta}) = h(x_i, z_j) e^{\bold{\eta}^\top T_{ij}(x_i, z_j) - A(\bold{\eta})}
+		$$
+	</center>
+	On obtient alors : 
+	<center>
+		$$
+		P(\bold{X}, \bold{Z} \mid \bold{\eta}) = \prod_{i,j}h(x_i, z_j) e^{\bold{\eta}^\top T_{ij}(x_i, z_j) - A(\bold{\eta})}
+		$$
+	</center>
+	L'espérance $\mathbb{E}_{\bold{Z} \mid \bold{X}, \eta_n} \log(P(\bold{X}, \bold{Z} \mid \bold{\eta}))  = \sum_{i,j} \mathbb{E}_{z_i \mid x_i, \eta_n} \log(P(x_i, z_j \mid \eta))$ devient :
+	<center>
+		$$
+		\begin{aligned}
+		&\sum_{i,j} \mathbb{E}_{z_j \mid x_i, \eta_n} \log(P(x_i, z_j \mid \eta)) \\
+		 &= \sum_{i,j} \mathbb{E}_{z_j \mid x_i, \eta_n} \left[\log(h(x_i, z_j)) + \bold{\eta}^\top [ T_{ij}(x_i, z_j)] - A(\bold{\eta})\right]
+		 \end{aligned}
+		 $$
+	</center>
+	La dérivation par rapport à $\eta$ et l'annulation du gradient implique que :
+	<center>
+		$$
+		\sum_{i,j} \mathbb{E}_{z_j \mid x_i, \eta_n}[T_{ij}(x_i, z_j)] = N\frac{\partial A(\eta)}{\partial \eta}
+		$$
+	</center>
+	<div class="remarque">
+		<b> Remarque :</b> L'étape E revient alors à calculer les espérances conditionnelles des $T_{ij}$.
+	</div>
+</section>
+
+<section>
+	<h1>Application : famille exponentielle (2/3)</h1>
+	Prenons un modèle de mélange simple monocanal
+	<center>
+	$$x(f,t) = \sum_{n=1}^{N} s_n(f,t)$$
+</center> où toutes les variables sont indépendantes et $s_n(f,t) \sim \mathcal{N}_{\mathbb{C}}(\sigma^2_n(f,t))$ .
+ On peut montrer que $P\left(\boldsymbol{X},\boldsymbol{s}\mid\Theta\right)$ est une famille exponentielle (car gaussienne) avec
+ <center>
+ $$T_n(f,t) = (\bold{y}_n(f,t), \bold{y}_n(f,t)\bold{y}_n(f,t)^\top)^\top$$
+ où $\bold{y}_n(f,t) = [s_n(f,t), x(f,t)]^\top$
+</center>
+
+Dans ce cas précis (comme il s'agit des espérances conditionnelles) l'étape E se réduit au final à déterminer les
+espérances et variances conditionnelles ($\hat{s}_n(f,t),\sigma^2_{n\mid x}(f,t)$). On a donc :
+<center>
+	$$\begin{aligned}
+	\hat{s}_n(f,t) &= \frac{\sigma_n^2(f,t)}{\sum_{n^\prime=1}^{N}\sigma_{n^\prime}^2(f,t)}x(f,t) \\
+	\sigma_{n \mid x}(f,t) &= \hat{s}_n(f,t)\hat{s}^{\star}_n(f,t) + \left(1- \frac{\sigma_n^2(f,t)}{\sum_{n^\prime=1}^{N}\sigma_{n^\prime}^2(f,t)}\right)\sigma_n^2(f,t)
+	\end{aligned}
+	$$
+</center>
+
+</section>
+<section>
+	<h1>Application : famille exponentielle (3/3)</h1>
+L'étape M revient donc à calculer les dérivées partielles par rapport aux $\sigma_n(f,t)$. On obtient au final tout simplement :
+<center>
+	$$\begin{aligned}
+   \sigma_n^2(f,t) = \sigma_{n \mid x}^2(f,t)
+	\end{aligned}
+	$$
+</center>
+Pour résumer on pourrait avoir l'algorithme suivant : 
+<div class="exemple">
+	<div id="title">[Algorithme de séparation "naïf" EM]</div>
+	<ol> <li><b>Entrées</b>
+		<ul>
+			<li> Données observées $\bold{X}$</li>
+			<li>Nombre d'itérations $I$ de l'algorithme EM</li>
+		</ul>
+	</li>
+	<li>
+		<b>Initialisation</b>
+		<ul>
+			<li>Initialiser les $\sigma^2_{n, (0)}(f,t), \forall n,f,t$</li>
+		</ul>
+	</li>
+	<li>
+		<b>Algorithme EM pour $i=1, \dots, I$ </b>
+			<ul>
+				<li>Etape-E en calculant $\hat{s}_{n, (i)}(f,t)$ et $\sigma_{n \mid x, (i)}^2(f,t)$</li>
+				<li>Etape-M (un peu inutile ici ...) on a $\sigma_{n,(i)}^2(f,t) = \sigma_{n \mid x, (i)}^2(f,t)$</li>
+			</ul>
+	</li>
+	</ol>
+</div>
+<p>
+<div class="remarque">En pratique, il faut initialiser les variances... (Dans le cas du débruitage, l'énergie du bruit peut être initialisé via un détecteur d'activité vocal)
+</div>
+</p>
+</section>
+
+<section>
+	<h1>Méthodes inspirées de l'algorithme EM (1/2)</h1>
+	<h2>Algorithme de maximisation-minimisation</h2>
+	Purement un problème d'optimisation itératif. Problème trop compliqué, alors on prend une fonction concave.<br>
+	<ul>
+		<li>Soit $f(\Theta)$ la fonction à majorer</li>
+		<li>On construit $g(\Theta \mid \Theta_i)$ concave à chaque iteration qui va minorer $f(\theta)$ comme suit :
+
+			<center>
+				$$
+				\begin{aligned}
+				g(\Theta \mid \Theta_i) &\leq f(\Theta),~ \forall \Theta \\
+				g(\Theta_i \mid \Theta_i) &= f(\Theta_i)
+				\end{aligned}
+				$$
+			</center>
+		</li>
+		<li> On maximise alors $g$ : $\Theta_{i+1}=\underset{\Theta}{\text{argmax }} g(\Theta \mid \Theta_i)$</li>
+		<li>Remarquons que $f(\Theta_{i+1})\geq f(\Theta_{i})$</li>
+	</ul>
+	<p>
+	<div class="references">
+		<ul>
+			<li> Kenneth Lange: "MM Optimization Algorithms", SIAM, ISBN 978-1-611974-39-3 (2016)</li>
+		</ul>
+	</div>
+</p>
+</section>
+
+<section>
+	<h1>Méthodes inspirées de l'algorithme EM (2/2)</h1>
+	<h2>Méthode de la fonction auxiliaire</h2>
+     <ul>
+		<li>On cherche à résoudre :
+
+				$\Theta^\star = \underset{\Theta}{\text{argmin }}J(\Theta)$
+
+		</li>
+		<li>On prend une <b>fonction auxiliaire </b> $Q(\Theta, \tilde{\Theta})$ tel que :<br>
+		$\quad \rightarrow J(\Theta) = \underset{\tilde{\Theta}}{\min~}Q(\Theta, \tilde{\Theta})$ <br>
+		$\quad Q(\Theta, \Theta) = J(\Theta)$
+	</li>
+	<li>On minimise alors alternativement les $\Theta$ et $\tilde{\Theta}$ :<br>
+	$\quad \rightarrow \tilde{\Theta}^{(i+1)}= \underset{\tilde{\Theta}}{\text{argmin }}Q(\Theta^{(i)}, \tilde{\Theta})$<br>
+	$\quad \rightarrow \Theta^{(i+1)} = \underset{\Theta}{\text{argmin }}Q(\Theta, \tilde{\Theta}^{(i+1)})$</li>
+	<li>Dans ce cas là, on a également que $Q(\Theta, \tilde{\Theta}) \geq J(\Theta)$.</li>
+	 </ul>
+<p>
+	 <div class="affirmation">
+		Utilisation d'un exemple concret en séparation de sources sonores ?
+	 </div>
+	</p>
+
+
+	<div class="references">
+		<ul>
+	<li>Lee, D., & Seung, H. S. (NEURIPS, 2000). Algorithms for non-negative matrix factorization.
+		 .</li>
+		 </ul>
+		</li>
+</section>
+
+<section>
+	<h1 style="margin-top:-1em;">AuxIVA (Auxiliary Independent component analysis) (1/2)</h1>
+	<ul>
+		<li>On reprend le modèle convolutif avec l'approximation en bande étroite :
+		<center>
+			$$
+			\bold{x}(f,t) = A(f)\bold{s}(f,t)
+			$$
+		</center>
+		</li>
+		<li>On cherche $W(f)=[\bold{w}_1(f), \dots, \bold{w}_N(f)]$ tel que $\bold{y}(f,t) = W(f)\bold{x}(f,t)$ avec $\bold{y}(f,t) = [y_1(f,t), \dots, y_n(f,t)]^\top$</li>
+		<li>On suppose les vecteurs $\bold{y}_n^{(t)} = [y_n(1,t), \dots, y_n(F,t)]^\top$ indépendants (IVA)</li>
+		<li>La fonction de coût du problème est définie par
+			<center>
+				$$J_t(W) = \sum_{n=1}^{N} \mathbb{E}[-\log P(\bold{y}_n^{t})] - \sum_{f=1}^{F} \log \left|\det W(f) \right|$$
+			</center>
+		</li>
+		<li>
+			Le modèle employé pour les $\bold{y}_n^{t}$ sont les modèles sphériques gaussiens :
+			<center>
+				$$
+				P(\bold{y}_n^{t}) = \frac{1}{\pi^F (r_n^{(t)})^F}e^{-\frac{||\bold{y}_n^{(t)}||^2}{r_n(t)}}
+				$$
+			</center>
+		</li>
+	<li>La fonction auxiliaire $Q(\bold{W}, \bold{V})$ est alors 
+		<center>
+			$$
+			Q(\bold{W}, \bold{V}) = \sum_{n,f=1}^{N,F}\bold{w}_{n}(f)\mathbb{E}[\frac{-\log P(||\bold{y}_n^{(t)}||^2)^{\prime}}{r_n^{(t)}}]
+			\bold{w}_{n}^\mathsf{H}(f)^
+			 - \log|\det(W(f))| + C
+			$$
+		</center>
+	</li>
+	</ul>
+</section>
+
+<section>
+	Au final, on dérive par rapport aux variables souhaitées et aux variables auxilaires pour obtenir l'algorithme suivant 
+	(avec $\bold{e}_n = [0, \dots, \underbrace{1}_{\text{n ème position}}, 0,\dots, 0]^\top$) 
+	:
+
+	<div class="exemple">
+		<div id="title">[Algorithme AuxIVA]</div>
+		<ol> <li><b>Entrées</b>
+			<ul>
+				<li> Données observées $\bold{X}$</li>
+				<li>Nombre d'itérations $I$ de l'algorithme itératif</li>
+			</ul>
+		</li>
+		<li>
+			<b>Initialisation</b>
+			<ul>
+				<li>Initialiser les $W(f), \forall n,f,t$</li>
+			</ul>
+		</li>
+		<li>
+			<b>Algorithme itératif pour $i=1, \dots, I$ </b>
+				<ul>
+					<li>mise à jour des $r_n^{(t)} = \sqrt{\sum_{f=1}^{F}|\bold{w}_{n}^\mathsf{H}(f)\bold{x}(f,t)|}$</li>
+					<li>mise à jour des $V_n(f) = \mathbb{E}[\frac{-\log P(||\bold{y}_n^{(t)}||^2)^{\prime}}{r_n^{(t)}}]$</li>
+					<li>mise à jour des $\bold{w}_n(f) = (W(f)V_n(f))^{1}\bold{e}_n$</li>
+					<li>mise à jour des  $\bold{w}_n(f) = \frac{\bold{w}_n(f)}{\sqrt{\bold{w}_n(f)^\mathsf{H}V_n(f)\bold{w}_n(f)}}$</li>
+				</ul>
+		</li>
+		</ol>
+	</div><br>
+	<div class="references">
+		<ul>
+			<li>Ono, N. Stable and fast update rules for independent vector analysis based on auxiliary function technique. WASPAA (2011)</li>
+		</ul>
+	</div>
+</section>
+
+<section>
+	<h2>Exemple d'AuxIVA </h2>
+	<img src="figures/images/config_2_sobi.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=60%>
+	<div class="multiCol" style="margin-top:0.1em">
+		<div class="col">
+			<label for="no_sp">
+			&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp 3 locuteurs<br>
+			</label>
+				<audio id="no_sp" controls>
+				<source
+						type="audio/mpeg"
+						src="multimedia/audio/multi_sp_SOBI.wav"/>
+					</audio> <br>
+
+		
+			<label for="cl_sp">
+				&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp locuteur 2 (auxIVA)<br>
+				</label>
+					<audio id="cl_sp" controls>
+					<source
+							type="audio/mpeg"
+							src="multimedia/audio/multi_sp_K=2_auxIVA.wav"/>
+						</audio>
+
+		</div>
+		<div class="col">
+			<label for="cl_sp">
+			&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsplocuteur 1 (auxIVA)<br>
+			</label>
+				<audio id="cl_sp" controls>
+				<source
+						type="audio/mpeg"
+						src="multimedia/audio/multi_sp_K=1_auxIVA.wav"/>
+					</audio> <br>
+		
+			<label for="cl_sp">
+				&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp locuteur 3 (auxIVA)<br>
+				</label>
+					<audio id="cl_sp" controls>
+					<source
+							type="audio/mpeg"
+							src="multimedia/audio/multi_sp_K=3_auxIVA.wav"/>
+						</audio>
+
+
+
+		</div>
+</section>
+
+<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+	<h2 id='coverh2'>V - Factorisation de matrices non négatives (NMF) </h2>
+</section>	
+
+<section>
+
+	<h1>Introduction</h1>
+	<ul>
+		<li>Technique très populaire pour l'analyse de données</li>
+		<li>Très employé (+ de 7000 citations pour le papier original)</li>
+		<li>Utilisables dans pleins de domaines (audio, computer vision, système de recommendations etc.)</li>
+	</ul>
+
+	<div class="references">
+		<ul>
+			<li>Lee, D., Seung, H. ”Learning the parts of objects by
+				non-negative matrix factorization.” Nature vol. 401, pp. 788–791
+				(1999).</li>
+		</ul>
+
+	</div>
+
+</section>
+
+<section>
+	<h1>Application en audio ?</h1>
+	<ul>
+		<li>Séparation de sources sonores</li>
+		<li>Restauration de fichiers audios</li>
+		<li>Transcription musicale</li>
+	</ul>
+</section>
+<section>
+	<h1>Idée générale de la NMF (1/2)</h1>
+	<ul>
+		<li>Soit $V$ une matrice avec des coefficients $\geq 0$</li>
+		<li>On veut décomposer $V$ comme un produit de matrice non négative $W$ et $H$ de rang plus faible :
+
+
+			
+		</li>
+	</ul>
+	<center>
+		$$
+		V \approx WH
+		$$
+		<img src="figures/images/NMF.png">
+	</center>
+</section>
+
+<section>
+	<h1>Idée générale de la NMF (2/2)</h1>
+	<ul>
+		<li>Autre point de vue : décomposition en pleins de matrices de rang $1$ et sommation</li>
+		<li>Un piano qui joue c'est plusieurs notes qui s'activent au cours du temps</li>
+
+	</ul>
+
+	<center>
+		$$
+		V \approx WH
+		$$
+		<img src="figures/images/NMF_rank1.png">
+	</center>
+	
+</section>
+
+<section>
+	<h1>NMF en audio (1/6)</h1>
+	<center>
+	<img src="figures/images/note_NMF.png">
+</center>
+</section>
+
+<section>
+	<h1>NMF en audio (2/6)</h1>
+	<center>
+	<img src="figures/images/notes_NMF.png", width="70%">
+</center>
+</section>
+<section>
+	<h1>NMF en audio (3/6)</h1>
+	<center>
+	<img src="figures/images/NMF_musique.png", width="80%">
+</center>
+</section>
+<section>
+	<h1>NMF en audio (4/6)</h1>
+	<center>
+	<img src="figures/images/NMF_musique2.png", width="80%">
+</center>
+</section>
+<section>
+	<h1>NMF en audio (5/6)</h1>
+	<center>
+	<img src="figures/images/NMF_musique3.png", width="80%">
+</center>
+</section>
+<section>
+	<h1>NMF en audio (6/6)</h1>
+	<ul>
+		<li>Exemple sur un Piano</li>
+		<li>$W$: dictionnaire de notes</li>
+		<li>$H$: activation des notes</li>
+	</ul>
+	<center>
+	<img src="figures/images/piano_NMF.png", width="100%">
+</center>
+</section>
+<section>
+	<h1>Exemples d'applications (1/3)</h1>
+	<ul>
+		<li>Ici, si $W$ représente les notes. Alors $H$ est transcription approximative.</li>
+	</ul>
+	<center>
+		<img src="figures/images/piano_NMF.png", width="100%">
+	</center>
+</section>
+
+<section>
+	<h1>Exemples d'applications (2/3)</h1>
+	<ul>
+		<li>Séparation de sources</li>
+	</ul>
+	<center>
+		<img src="figures/images/NMF_musique3.png", width="80%">
+	</center>
+</section>
+
+<section>
+	<h1>Exemples d'applications (3/3)</h1>
+	<ul>
+		<li>Restauration de fichiers audios</li>
+		<li>On utilise $W$ et/ou $H$ pour la restauration</li>
+	</ul>
+	<center>
+		<img src="figures/images/restore_NMF.png", width="80%">
+	</center>
+	<div class="remarque">Comment estime-t-on $W$ et $H$ ?</div>
+</section>
+
+<section>
+	<h1>Résolution du problème</h1>
+	<ul>
+		<li>On cherche $W$ et $H$ telle que l'erreur
+			d'une certaine metrique soit minimisé entre $V$ et $WH$ :
+			<center>
+				$$
+				\underset{W \geq 0,H \geq 0}{\min}d(V \mid WH)
+				$$
+			</center>
+	    </li>
+		<li>Ces distances sont plutôt coordonnées par coordonnées :
+			 $$d(V \mid WH) = \sum_{f,t=1}^{F,T} d (v_{ft} \mid \sum_{k=1}^{K}w_{fk}h_{kt})$$</li>
+		<li> $||V-WH||^2$ la distance euclidienne.</li>
+		<li>$V\log\frac{V}{WH} - V + WH$: la divergence de Kullback-Leibler</li>
+		<li>$\frac{V}{WH} - \log(\frac{V}{WH}) -1$ : la divergence d'Itakura-Saito</li>
+
+	</ul>
+	<p>
+	<center>
+		<div class="remarque">On se concentra ici sur la divergence de Kullback-Leibler</div>
+	</center>
+</p>
+</section>
+<section>
+	<h1>Résolution du problème</h1>
+	<ul><li>Soit $V=\{v_{ft}\}_{f,t=1}^{F,T}, W=\{w_{fk}\}_{f,k=1}^{F,K}, H=\{h_{kt}\}_{k,t=1}^{K,T}$</li>
+		<li>On calcule simplement les dérivées partielles $\frac{\partial}{\partial w_{fk}}$ et $\frac{\partial}{\partial h_{kt}}$</li>
+	</ul>
+	On a alors au choix deux solutions : 
+	<ul>
+		<li>Soit on fait une descente du gradient $w_{fk}^{(i)} \leftarrow w_{fk}^{(i-1)} - \eta \nabla w_{fk}^{(i-1)}$</li>
+		<li>Soit on regarde l'annulation du gradient et on obtient les mises à jours suivantes:
+			<center>
+				$$W \leftarrow W \circ \frac{\frac{V}{WH}H^\top}{\bold{1}H^\top}$$
+			</center>
+			<center>
+				$$H \leftarrow H \circ \frac{W^\top\frac{V}{WH}}{W^\top\bold{1}}$$
+			</center>
+
+		</li>
+	<li> $\circ$ : produit terme à terme</li>
+	<li>$\frac{.}{.}$ : division terme à terme</li>
+	<li>$\bold{1}$ : matrice remplie de $1$ (afin d'avoir la bonne dimension)</li>
+</ul>
+</section>
+
+<section>
+	<h1>Algorithme NMF en audio (avec divergence de Kullback-Leibler)</h1>
+	<div class="exemple">
+		<div id="title">Algorithme KL-NMF</div>
+		<ol> <li><b>Entrées</b>
+			<ul>
+				<li> Données observées $\bold{X}$</li>
+				<li>Nombre d'itérations $I$ de l'algorithme itératif</li>
+			</ul>
+		</li>
+		<li>
+			<b>Initialisation</b>
+			<ul>
+				<li>Initialiser les matrices $W,H, \forall n,f,t$</li>
+				<li> Calculer $V = |X|^2$ (spectrogramme de puissance)</li>
+			</ul>
+		</li>
+		<li>
+			<b>Algorithme itératif pour $i=1, \dots, I$ </b>
+				<ul>
+					<li>mise à jour $W \leftarrow W \circ \frac{\frac{V}{WH}H^\top}{\bold{1}H^\top}$</li>
+					<li>mise à jour des $H \leftarrow H \circ \frac{W^\top\frac{V}{WH}}{W^\top\bold{1}}$</li>
+				</ul>
+		</li>
+		</ol>
+	</div>
+	<p>
+	<div class="remarque">Comment reconstruire le signal après estimation de $W$ et $H$?</div>
+    </p>
+</section>
+<section>
+	<h1>Reconstruction des sources</h1>
+	<ul>
+		<li>On utilise le filtrage de Wiener comme suit:
+		<center>
+		$$x_{kft} = x_{ft} \frac{w_{fk}h_{kt}}{\sum_{k^\prime=1}^{K}w_{fk^\prime}h_{k^\prime t}}$$
+		</center></li>
+		<li>En matriciel, cela donne:
+			<center>
+				$$\bold{X}_k = \bold{X} \circ \frac{\bold{W}(:,k)\bold{H}(k, :)}{\bold{W}\bold{H}}$$
+				</center>
+		</li>
+	</ul>
+</section>
+
+<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+	<h2 id='coverh2'>VI - Factorisation de matrices non négatives multicanal (MNMF)</h2>
+</section>	
+
+<section>
+	<h1>Motivations</h1>
+<ul>
+	<li>Séparation de sources en multicanal même dans le cas sous-déterminé ($M < N$)</li>
+	<li>En considérant plusieurs sources polyphoniques (NMF)</li>
+	<li>Combinaison de modèle multicanal + NMF $\implies$ MNMF</li>
+	<li>On étudie alors des <b>tenseurs</b> de taille $ M \times F \times T$</li>
+</ul>
+<center>
+<img src="figures/images/MNMF.png">
+</center>
+</section>
+
+<section>
+	<h1>Modèle de mélange convolutif bruité + NMF</h1>
+	<ul>
+		<li>On reprend un modèle de mélange convolutif avec approximation par
+			bande étroite  de $N$ sources dans le domaine temps-fréquence à laquelle on 
+			ajoute un bruit gaussien décorrélé et stationnaire :
+			
+			<center>
+				$$
+				\bold{x}(f,t) = \bold{A}(f)\bold{s}(f,t) + \bold{b}(f,t)
+				$$
+			</center>
+		</li>
+		<li>Chaque entrée $s_n(f,t)$ de $\bold{s}(f,t)=[s_1(f,t), \dots, s_N(f,t)]^\top \in \mathbb{C}^{N}$ est  indépendante des autres tel que :
+			<center>
+				$$
+				p_n(f,t) = \mathbb{E}(|s_n(f,t)|^2) \qquad\texttt{(Spectrogramme de Puissance)}
+				$$
+			</center>
+        Enfin, $\bold{b}(f,t) \sim \mathcal{N}_{\mathbb{C}}^{M}(\text{diag}[\sigma^2_{m}(f)]_{m=1}^{M}\triangleq \Sigma_{b,f})$.  On note $\Sigma_{n,ft}=\text{diag}([p_n(f,t)]_{n=1}^{N})$
+		</li>
+		<li>
+			Chaque source admet une décomposition NMF régie par le modèle suivant 
+			<center>	
+			$$s_n(f,t) = \sum_{k \in \mathcal{K}_n} c_{k}(f,t) \quad \quad  c_{k}(f,t) \sim \mathcal{N}_{\mathbb{C}}(w_{k}(f)h_{k}(t))$$ 
+		</center>
+		Avec $\mathcal{K}_n$ le nombre de composantes latentes (e.g. notes) associée à la source $n$.
+		</li>
+
+	</ul>
+	
+	<p>
+	   <div class="remarque">Estimation des paramètres via l'algorithme EM ?</div>
+	</p>
+	<div class="references">
+		<ul><li>A. Ozerov and C. Fevotte, "Multichannel Nonnegative Matrix Factorization in Convolutive Mixtures for Audio Source Separation,", TASLP. 2010.</li></ul>
+	</div>
+</section>
+
+<section>
+<h1>Log de Vraisemblance complète</h1>
+<ul>
+<li>Comme précédemment dans le cas gaussien monocanal, on prend en compte les données complètes $P(\bold{X}, \bold{C} \mid \Theta)$
+	avec $\bold{X} = \{\bold{x}(f,t)\}_{f,t=1}^{F,T}, \bold{C} = \{c_{kn}(f,t)\}_{n,f,t,k=1}^{N,F,T,K}$
+	 et $\bold{\Theta}=\{\Sigma_{b,f}, \bold{A}(f), w_k(f), h_k(t)\}_{f,t,k=1}^{F,T,K}$.
+</li>
+<li>Le calcul (en considérant $-\log P(\bold{X},\bold{S} \mid \bold{\Theta})$) revient à faire : 
+	<center>
+		$$
+		-\log P(\bold{X},\bold{S} \mid \bold{\Theta}) = -\log P(\bold{X} \mid \bold{S}, \bold{\Theta})  -\log P(\bold{S} \mid \bold{\Theta}) 
+		$$
+	</center>
+</li>
+<li>On peut démontrer que (en omettant les constantes dépendant de $\pi$) :
+	<center>
+		$
+		\begin{aligned}
+		-\log P(\bold{X}\mid \bold{S} , \bold{\Theta}) &= \sum_{f,t=1}^{F,T} \log \det \Sigma_{b,f} + \left(\bold{x}(f,t)-\bold{A}(f)\bold{s}(f,t)\right)^\mathsf{H}\Sigma_{b,f}^{-1}\left(\bold{x}(f,t)-\bold{A}(f)\bold{s}(f,t)\right) \\
+		-\log P(\bold{S} \mid \bold{\Theta}) &= \sum_{k,f,t=1}^{\mathcal{K},F,T}\left(\log(w_k(f)h_k(t))) + \frac{|c_k(f,t)|^2}{w_k(f)h_k(t)}\right)
+		\end{aligned}
+		$
+	</center>
+</li>
+<li> En utilisant la "technique de la trace" et en simplifiant on a :
+	<center>
+		$
+		\begin{aligned}
+	 -\log p(\bold{X}, \bold{S} \mid \bold{\Theta}) = <\eta(\bold{\Theta}),\bold{T}(\bold{X},\bold{S})> + \nu(\bold{\Theta})
+		\end{aligned}
+		$
+	</center>
+Avec $\bold{T}(\bold{X}, \bold{S})$ les statistiques naturelles d'une gaussienne.
+</li>
+
+</ul>
+ <div class="remarque">Une nouvelle fois, on a une famille exponentielle. </div>
+</section>
+
+<section>
+	<h1>Etape E</h1>
+	<ul>
+		<li>Les statistiques suffisantes des données $(\bold{X}, \bold{S})$ sont $\{\bold{R}_{xx,f}, \bold{R}_{xs,f}, \bold{R}_{ss,f}, u_k(f,t) = |c_k(f,t)|^2\}$</li>
+		où $ \bold{R}_{de,f} =\frac{1}{T}\sum_{t}\bold{d}(f,t)\bold{e}(f,t)^{\mathsf{H}}$
+		<li>On doit calculer les espérances $\mathbb{E}_{\bold{S} \mid \bold{X},\bold{\Theta}_i}$ des statistiques suffisantes :</li>
+		<center style="margin-left:-2em; margin-top:-1em;">
+		$\begin{aligned}
+		\mathbb{E}_{\bold{S} \mid \bold{X},\bold{\Theta}_i}[\bold{R}_{xx,f}] &= \hat{\bold{R}}_{xx,f} = \frac{1}{T}\sum_{t=1}^{T}\bold{x}_{ft}\bold{x}_{ft}^{\mathsf{H}} \\
+		\mathbb{E}_{\bold{S} \mid \bold{X},\bold{\Theta}_i}[\bold{R}_{xs,f}] &= \hat{\bold{R}}_{xs,f} = \frac{1}{T} \sum_{t=1}^{T}\bold{x}(f,t)\hat{s}^{\mathsf{H}}_{(i)}(f,t)\\
+		\mathbb{E}_{\bold{S} \mid \bold{X},\bold{\Theta}_i}[\bold{R}_{ss,f}] &= \hat{\bold{R}}_{ss,f} = \frac{1}{T}\sum_{t=1}^{T}\hat{s}_{(i)}(f,t)\hat{s}^{\mathsf{H}}_{(i)}(f,t) + (\bold{I} - \bold{W}_s(f,t)\bold{A}(f))\Sigma_{s, ft} \\
+		\mathbb{E}_{\bold{S} \mid \bold{X},\bold{\Theta}_i}[u_k(f,t)] &= \hat{u}_{k}(f,t) =  [\hat\bold{c}_{(i)}(f,t)\hat\bold{c}_{(i)}(f,t)^\mathsf{H} + (\bold{I} - \bold{W}_{c}(f,t)\bold{A}(f))\Sigma_{c,ft}]_{k,k}
+		\end{aligned}
+		$
+	</center>
+	</ul>
+	Avec $\bold{W}_e(f,t) = \Sigma_{e, ft}\bold{A}(f)^{\mathsf{H}}\Sigma_{x, ft}^{-1}$, $\hat{\bold{e}}(f,t) = \bold{W}_e(f,t)\bold{x}(f,t)$
+</section>
+
+<section>
+	<h1>Etape M</h1>
+
+	En dérivant la somme des espérances conditionnelles précédentes par rapport aux paramètres à updater, on obtient : 
+
+		$\begin{aligned}
+		\bold{A}(f) &= \hat{\bold{R}}_{xs,f}\hat{\bold{R}}_{ss,f}^{-1} \\
+		\Sigma_{b,f} &= \text{Diag}\left(\hat{\bold{R}}_{xx,f} - \bold{A}(f)\hat{\bold{R}}^{\mathsf{H}}_{xs,f} - \hat{\bold{R}}_{xs,f}\bold{A}(f)^{\mathsf{H}}
+                                     + \bold{A}(f)\hat{\bold{R}}_{ss,f}\bold{A}(f)^{\mathsf{H}}\right) \\
+		w_k(f) &= \frac{1}{T}\sum_{t}\frac{\hat{u}_{k}(f,t)}{h_k(t)}; \qquad h_k(t) = \frac{1}{F}\sum_{f}\frac{\hat{u}_{k}(f,t)}{w_k(f)}
+		\end{aligned}
+		$
+</section>
+
+<section>
+	<h1>Reconstruction des sources</h1>
+	<ul>
+		<li>Une fois l'algorithme EM effectué et les paramètres estimés, on effectue un filtrage de Wiener multicanal :
+			<center>$$\bold{s}_{n}(f,t) = \bold{W}_n(f,t)\bold{x}(f,t)$$</center>
+		</li>
+	</ul>
+	<p>
+	<div class="remarque">Cette approche est cependant gourmande en temps de calcul. Autre approche ?</div>
+</p>
+</section>
+
+<section>
+	<h1>Minimisation de la somme des canaux</h1>
+	<ul>
+	<li>Les $\bold{X}= \{x_{m}(f,t)\}_{f,t,m=1}^{F,T,M}$ forment un tenseur.</li> 
+	<li>En considérant tous leurs spectrogrammes de puissance, on peut prendre en compte une factorisationen tenseur non-négatif (NTF)</li>
+	<li>pour une valeur du spectrogramme de puissance (SP) $\hat{p}_m(f,t)$ du mélange on écrit : 
+		<center>
+			$$
+			\hat{p}_m(f,t) = \sum_{n,k=1}^{N,K} q_{nm}(f)w_f(k)h_k(t)
+			$$
+		</center>
+
+
+	</li>
+	<li>Ainsi le SP du mélange et la $\sum$ des SP des sources pondéré par un scalaire lié à chaque microphone et fréquence.</li>
+	<li>Ici, il est proposer de minimiser les divergence d'Itakura-Saito suivante  avec $\Theta = \{\bold{Q}, \bold{W}, \bold{H}\}$ :
+		<center>
+			$$
+			d_{IS}(\bold{X} \mid \Theta) = \sum_{m,f,t = 1}^{M, F, T}d_{IS}(p_m(f,t) := |x_m(f,t)|^2 \mid \hat{p}_m(f,t))
+			$$
+		</center>
+
+	</li>
+</ul>
+<p>
+	<div class="remarque">Le problème est bien plus simple à résoudre ! (Mais les hypothèses plus fortes)</div>
+</p>
+</section>
+
+<section>
+	<h1>Mise à jour des paramètres</h1>
+	Si on dérive par rapport aux paramètres et qu'on regarde quand le gradient s'annule, on obtient les mises à jour suivantes : 
+	<center>
+	$\begin{aligned}
+	  \bold{q}_{mn} &\leftarrow \bold{q}_{mn} \circ
+	   \frac{\left[\hat{\bold{P}}_{m}^{\circ -2} \circ \bold{P}_{m}
+	         \circ (\bold{W}_{n}\bold{H}_{n})\right]\bold{1}_{T \times 1}}
+			 {\left[\bold{P}_{m}^{\circ -1} \circ (\bold{W}_{n}\bold{H}_{n})\right]\bold{1}_{T \times 1}} \\
+		\bold{W}_n &\leftarrow \bold{W}_n \circ \frac{\sum_{m=1}^{M}\text{diag}(\bold{q}_{nm})\left(\hat\bold{P}_{m}^{\circ -2} 
+		                                        \circ \bold{P}_{m}\right)\bold{H}^\top_n}
+												{\sum_{m=1}^{M}\text{diag}(\bold{q}_{nm})\hat\bold{P}_{m}^{\circ -1} 
+		                                        \bold{H}^\top_n} \\
+		\bold{H}_n &\leftarrow \bold{H}_n \circ \frac{\sum_{m=1}^{M}\left(\text{diag}(\bold{q}_{nm})\bold{W}_{n}\right)^\top\left(\hat\bold{P}_{m}^{\circ -2} 
+		                                        \circ \bold{P}_{m}\right)}
+												{\sum_{m=1}^{M}\left(\text{diag}(\bold{q}_{nm})\bold{W}_{n}\right)^\top\hat\bold{P}_{m}^{\circ -1} 
+		                                        } 												
+		 \end{aligned}$
+			  
+	
+</center>
+</section>
+
+<section>
+	<h1>Résumé</h1>
+	<ul>
+		<li>On a vu, deux approches MNMF : <br>
+			$\quad \rightarrow$ La première est basée sur l'utilisation d'un modèle convolutif + développer un algorithme EM <br>
+			$\quad \rightarrow$ La seconde cherche à minimiser une divergence point par point entre le spectrogramme de puissance du mélange et un modèle NTF.
+		</li>
+		<li>
+			Globalement les avantages et inconvénient sont :<br>
+			$\quad \rightarrow$ (EM) : compliqué à dériver et lourd en calcul mais précis <br>
+			$\quad \rightarrow$ multiplicative update (MU) : simple à dériver mais des hypothèses fortes (distance point par point qui ne prend pas totalement en compte 
+			l'inter corrélation entre les microphones)
+		</li>
+	</ul>
+</section>
+
+
+<section>
+	<h1>Modèle de diffusion</h1>
+
+	Soit $s_n(f,t)$ une source ponctuelle et $s_n(f,t,\psi)$ avec $\psi \in \Psi_n$ une source diffuse.
+	On note par ailleurs, $\bold{y}_n(f,t)=[y_{1n}(f,t), \dots, y_{Mn}(f,t)]^\top$ la source image captée par les $M$ microphones.
+	<ul>
+		<li>$\Psi_n$ est l'aire où se trouve la source (elle n'est pas forcément ponctuelle).</li>
+		<li>dans le cas ponctuel, on rappelle que l'approximation à bande étroite donne :
+			<center>
+				$$
+				\bold{y}_n(f,t) = \bold{a}_n(f)s_n(f,t)
+				$$
+			</center>
+			où $\bold{a}_{n}(f) \in \mathbb{C}^M$.
+
+		</li>
+		<li>
+			avec un modèle de diffusion, on aura plutôt une contribution pour tous les points de $\Psi_n$ i.e.:
+			<center>
+				$$
+				\bold{y}_{n}(f,t) = \int_{\psi \in \Psi_n} s(f,t,\psi)\bold{a}_{n\psi}(f)d\psi
+				$$
+			</center>
+		</li>
+	</ul>
+	<p>
+	<div class="remarque"> Comment exploiter ce modèle de diffusion ? </div>
+    </p>
+</section>
+
+<section>
+	<h1>Hypothèse et matrice de covariance spatiale</h1>
+	Supposons que les $s_n(f,t,\psi) \sim \mathcal{N}_{\mathbb{C}}^1 (0, p_n(f,t))$.
+	On regarde alors la matrice de covariance des $\bold{y}_{n}(f,t)$ : 
+	<center>
+	$$
+	\mathbb{E}[\bold{y}_n(f,t)\bold{y}_n(f,t)^\mathsf{H}]=\int_{\psi \in \Psi_n}\mathbb{E}[s(f,t,\psi)s(f,t,\psi)^\star]\bold{a}_{n\psi}(f)\bold{a}_{n\psi}(f)^\mathsf{H}d\psi
+	$$
+	</center>
+	Cependant, les $s(f,t,\psi)$ ont même distribution:
+	$$
+	\quad \rightarrow \mathbb{E}[s(f,t,\psi)s(f,t,\psi)^\star] = p_n(f,t) \geq 0
+	$$
+	<p>
+		Donc finalement :
+		$$
+		\begin{aligned}
+		\mathbb{E}[\bold{y}_n(f,t)\bold{y}_n(f,t)^\mathsf{H}] &= p_n(f,t)\int_{\psi \in \Psi_n}\underbrace{\bold{a}_{n\psi}(f)\bold{a}_{n\psi}(f)^\mathsf{H}}_{\in \mathbb{C}^{M\times M}}d\psi \\
+		&= p_n(f,t)\bold{R}_n(f)
+		\end{aligned}
+		$$
+
+	</p>
+	<div class="remarque">
+		La matrice $\bold{R}_n(f)$ est appellée la matrice de covariance spatiale. Elle représente le chemin acoustique entre
+ chaque point qui constitue la source et chaque microphone. Le scalaire $p_n(f,t)$ peut-être vu comme le spectrogramme de puissance.
+	</div>
+</section>
+
+<section>
+	<h1>Modèle spatial </h1>
+Ainsi, nos sources images $\bold{y}_n(f,t)$ sont supposés admettre le modèle GCCC suivant :
+
+<center>
+	$$
+	\bold{y}_n(f,t) \sim \mathcal{N}_{\mathbb{C}}^M(0,p_n(f,t)\bold{R}_n(f))
+	$$
+</center>
+
+Si on rajoute le modèle de mélange $\bold{x}(f,t) = \sum_{n=1}^{N}\bold{y}_n(f,t)$ et que toutes les sources sont indépendantes $\forall n,f,t,$ on a :
+<center>
+	$$
+	\bold{x}(f,t) \sim \mathcal{N}_{\mathbb{C}}^M(0,\sum_{n=1}^{N}p_n(f,t)\bold{R}_n(f))
+	$$
+</center>
+
+<h2>Mélange convolutif </h2>
+<ul>
+	<li>Si on suppose que les $\bold{R}_n(f) = \bold{a}_n(f)\bold{a}_n^\mathsf{H}(f)$ sont de rang $1$ alors : 
+		<center>
+		$$
+		\bold{x}(f,t) = \sum_{n=1}^{N}\bold{a}_n(f)s_n(f,t) = \bold{A}(f)\bold{s}(f,t)
+		$$
+			</center>
+			Où les $s_n(f,t) \sim \mathcal{N}_{\mathbb{C}}^{M}(0,p_n(f,t))$ 
+	</li>
+</ul>
+	<p>
+	<div class="remarque">
+		Sous ces contraintes, comment estimer les paramètres ?
+	</div>
+    </p>
+
+	<div class="references">
+		<ul>
+			<li>N. Q. K. Duong, E. Vincent and R. Gribonval, "Under-Determined Reverberant Audio Source Separation Using a Full-Rank Spatial Covariance Model," IEEE TASP. 2010. </li>
+		</ul>
+	</div>
+	
+</section>
+
+<section>
+	<h1>Algorithme EM pour la séparation de sources du modèle spatial non contraint (1/2)</h1>
+	<ul>
+		<li>Nous allons refaire appel à l'algorithme EM</li>
+		<li>Soit $\bold{R}_n(f,t) = p_n(f,t)\bold{R}_{n}(f)$, $\bold{R}(f,t) = \sum_{n=1}^{N}\bold{R}_{n}(f,t)$, 
+			$\bold{\Theta} = \{p_n(f,t), \bold{R}_{n}(f)\}_{n,f,k,t = 1}^{N, F, K, T}$
+			et $\bold{X} = \{\bold{x}_{ft}\}_{f,t = 1}^{F,T}$.
+		</li>
+		<li>On peut alors montrer, comme dans le cas Gaussien monocanal, que 
+			$P(\bold{X}, \bold{Y} \mid \bold{\Theta})$ est une famille exponentielle. 
+		</li>
+		<li>L'étape $E$ se résume alors à estimer l'éspérance conditionelle 
+			$\hat\bold{y}_n(f,t)=\mathbb{E}[\bold{y}_n(f,t) \mid \bold{x}(f,t)]$ et la variance conditionnelle $\hat\bold{R}_{n}(f,t)=\text{Var}[\bold{y_n}(f,t) \mid \bold{x}(f,t)]$. On retombe à nouveau 
+			sur un filtrage de Wiener et la variance conditionnelle d'une Gaussienne :
+		<center>
+		$ \begin{aligned}
+			\bold{W}_n(f,t) &= \bold{R}_{n}(f,t)\bold{R}^{-1}(f,t) \quad \quad \texttt{(Masque de Wiener)}\\
+			\hat\bold{y}_n(f,t) &= \bold{W}_n(f,t)\bold{x}(f,t) \\
+			\hat\bold{R}_n(f,t) &= \hat\bold{y}_n(f,t)\hat\bold{y}^{\mathsf{H}}_n(f,t) + (\bold{I}_{M} - \bold{W}_n(f,t))\bold{R}_{n}(f,t)
+		\end{aligned}
+			$
+
+	    </center>
+		</li>
+
+	</ul>
+</section>
+
+<section>
+	<h1>Algorithme EM pour la séparation de sources du modèle spatial non contraint (2/2)</h1>
+	<ul>
+		<li>Un calcul assez laborieux des dérivées le long de $p_n(f,t)$ et $\bold{R}_n(f,t)$ nous donne :
+			<center>
+				$\begin{aligned}
+				  p_n(f,t) &= \frac{1}{M}\text{Tr}(\bold{R}_{n}^{-1}(f)\hat\bold{R}_n(f,t)) \\
+				  \bold{R}_{n}(f) &= \frac{1}{M} \sum_{t=1}^{T}\frac{\hat\bold{R}_n(f,t)}{p_n(f,t)}
+				  \end{aligned}
+				$
+
+			</center>
+
+		</li>
+	</ul>
+	<p>
+	<b>Remarque : </b> Comme il s'agit de la somme de matrice de rang $1$, on peut aisément supposer les $\bold{R}_{n}(f)$ de rang plein.
+</p>
+<div class ="remarque">Version avec un modèle NMF + MU ? </div>
+</section>
+<section>
+	<h1>Divergence d'Itakura-Saito et NLL Gaussienne (1/2)</h1>
+	<h2>Disgression : cas monocanal</h2>
+	<ul>
+		<li>Prenons $\bold{X} = \{x(f,t)\}_{f,t=1}^{F,T}$ les observations et $\Theta = \{w_k(f), h_k(t)\}_{f,k,t=1}^{F,K,T}$ les paramètres. 
+			On suppose que  les entrées indépendantes et $x(f,t) \sim \mathcal{N}_{\mathbb{C}}(\sum_{k=1}^{K}w_k(f)h_k(t))$.
+		</li>
+		<li>
+			Les paramètres à optimiser sont uniquement les $w_k(f)$ et $h_k(t)$. Le reste sera "spdg" appellée "constante" 
+			(la dérivation n'influencera pas l'estimation des paramètres). <br>
+			$\quad \rightarrow$ On notera notamment $\overset{c}{=}$ qui signifie "égal à une constante additive près"
+		</li>
+		<li>
+			Si on regarde $-\log p(\bold{X} \mid \bold{\Theta})$ alors on peut prouver que :
+			<center>
+			$$
+			-\log p(\bold{X} \mid \bold{\Theta}) \overset{c}{=} \sum_{f,t=1}^{F,T} d_{\text{IS}}(|x(f,t)|^2 \mid \sum_{k=1}^{K}w_k(f)h_k(t))
+			$$
+		</center>
+		Où $d_{IS}(x \mid y) = \frac{x}{y} - \log\frac{x}{y}  -1$
+		</li>
+	</ul>
+	<p>
+	<div class="remarque">Dans le cas monocanal, minimiser la NLL est équivalent à minmiser la $d_{IS}$. 
+		Mais quel est le lien exact entre les deux ?
+	</div>
+</p>
+</section>
+
+<section>
+	<h1>Divergence d'Itakura-Saito et NLL Gaussienne (2/2)</h1>
+	<ul>
+		<li>Posons pour alléger $\tilde{x}(f,t) = |x(f,t)|^2$ et $\hat{x}(f,t) = \sum_{k=1}^{K}w_k(f)h_k(t)$</li>
+		<li>On peut alors montrer que (les densités ici sont toutes gaussiennes) :
+			<center>
+				$$
+				d_{\text{IS}}(|x(f,t)|^2 \mid \hat{x}(f,t)) = \log P(x(f,t) \mid \tilde{x}(f,t)) - \log P(x(f,t) \mid \hat{x}(f,t))
+				$$
+			</center>
+		</li>
+	</ul>
+	<h2>Extension au cas multicanal</h2>
+	Maintenant, dans le cas multicanal considérons un modèle avec une covariance spatiale latente (diffusion des sources latentes) :
+	<ul>
+		<li>Soit $\hat\bold{X}(f,t) = \sum_{k=1}^{K}\bold{R}_k(f)w_k(f)h_k(t)$ et $\tilde{\bold{X}}(f,t) = \bold{x}(f,t)\bold{x}(f,t)^\mathsf{H}$</li>
+		<li>On définit alors une divergence d'IS basée sur le cas monocanal comme suit :
+			<center>
+			$\begin{aligned}
+
+			d_{\text{IS}}(\bold{X}(f,t) \mid \tilde\bold{X}(f,t)) &= \log P(\bold{x}(f,t) \mid \tilde\bold{X}(f,t)) - \log P(\bold{x}(f,t) \mid \hat\bold{X}(f,t)) \\
+			&= \mathrm{Tr}(\tilde\bold{X}(f,t)\hat\bold{X}(f,t)^{-1}) - \log \det \tilde\bold{X}(f,t)\hat\bold{X}(f,t)^{-1} - M
+			\end{aligned}
+			$
+		</center>
+		</li>
+	</ul>
+	<p>
+		<div class="remarque">On va maintenant utiliser la méthode de la fonction auxiliaire</div>
+	</p>
+	<div class="references">
+		<ul><li>
+		H. Sawada, H. Kameoka, S. Araki and N. Ueda, "Multichannel Extensions of Non-Negative Matrix Factorization With Complex-Valued Data," TASLP. 2013.</li>
+		</ul>
+	</div>
+</section>
+
+<section>
+	<h1>Fonction Auxiliaire</h1>
+<ul>
+	<li>Il a été montré (non trivial !) que :
+		<center style="margin-left:-4em;">
+			$\begin{aligned}
+			f^{+}(\bold{W}, \bold{H}, \bold{R}, \bold{U}, \bold{V}) \\
+			=  \sum_{f,t=1}^{F,T} \left[
+			\sum_{k=1}^{K}\frac{\mathrm{Tr}(\tilde{\bold{X}}(f,t)\bold{U}_k(f,t)^\mathsf{H}
+			                                       \bold{R}_k(f)\bold{U}_k(f,t))}{w_k(f)h_k(t)}
+								         + \log \det \bold{V}(f,t) + \frac{\det \hat\bold{X}(f,t) - \det \bold{V}(f,t)}{\det \bold{V}(f,t)}
+			\right]
+			\end{aligned}
+			$
+		</center>
+	</li>
+	vérifie :
+	<center> 
+	$f^{+}(\bold{W}, \bold{H}, \bold{R}, \bold{U}, \bold{V}) \geq \sum_{f,t} d_{\text{IS}}(\bold{X}(f,t) \mid \tilde\bold{X}(f,t)) $
+</center>
+<li>Avec égalité pour $\bold{U}_k(f,t) = w_k(f)h_k(t)R_k(f)\hat\bold{X}(f,t)^{-1}$, $\bold{V}(f,t)=\hat\bold{X}(f,t)$</li>
+</ul>
+<div class="remarque">On effectue donc les dérivées et on regarde quand le gradient s'annule par rapport à ces fonctions</div>
+</section>
+
+<section>
+	<h1>Mise à jour des paramètres</h1>
+Les paramètres de la NMF sont mis à jour comme suit :
+
+		$
+		\begin{aligned}
+		w_k(f) &\leftarrow w_k(f) \frac{\sum_{t=1}^{T}h_k(t)\mathrm{Tr}(\hat\bold{X}(f,t)^{-1}\tilde\bold{X}(f,t)\hat\bold{X}(f,t)^{-1}\bold{R}_k(f))}{\sum_{t=1}^{T}h_k(t)\mathrm{Tr}(\hat\bold{X}(f,t)^{-1}\bold{R}_k(f))} \\
+		h_k(t) &\leftarrow h_k(t) \frac{\sum_{f=1}^{F}w_k(f)\mathrm{Tr}(\hat\bold{X}(f,t)^{-1}\tilde\bold{X}(f,t)\hat\bold{X}(f,t)^{-1}\bold{R}_k(f))}{\sum_{f=1}^{F}w_k(f)\mathrm{Tr}(\hat\bold{X}(f,t)^{-1}\bold{R}_k(f))}
+		\end{aligned}
+		$
+
+<p>
+Quand on regarde la dérivée par rapport à $\bold{R}_k(f)^{\mathsf{H}}$ et qu'on regarde l'annulation du gradient on trouve que :
+</p>
+<center>
+$$
+\bold{R}_k(f)\left[\sum_{t=1}^{T}w_k(f)\hat\bold{X}(f,t)^{-1}\right]\bold{R}_k(f) = 
+\bold{R}_k(f)^{\prime}\left[\sum_{t=1}^{T}\hat\bold{X}(f,t)^{-1}\tilde\bold{X}(f,t)\hat\bold{X}(f,t)^{-1}\bold{R}_k(f)\right]\bold{R}_k(f)^{\prime}
+$$
+</center>
+<p>
+<div class="remarque">Le problème précédent est une équation de Ricatti et peut être résolu en pratique</div>
+</p>
+</section>
+</div>
+
+
+
+
+<div class='footer'>
+	<img src="css/theme/img/logo-ensta.svg" id="logo2" alt="Logo"/>	
+	<img src="css/theme/img/logo-Telecom.svg" id="logo1" alt="Logo"/>
+	<div id="middlebox">Introduction à la séparation de sources - ATIAM</div>
+	<ul>
+	</ul>
+</div>
+			</div>
+
+		</div>
+
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: false,
+				slideNumber: true,
+				minScale: 0.1,
+				maxScale: 5,
+				transition: 'none', //
+
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/math-katex/math-katex.js', async: true },
+					{ src: 'plugin/reveald3/reveald3.js' },
+					{ src: 'plugin/highlight/highlight.js', async: true }
+				]
+			});
+		</script>
+
+	</body>
+
+</html>

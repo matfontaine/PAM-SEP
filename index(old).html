@@ -1,0 +1,1408 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Mi205 - Télécom Paris & Ensta</title>
+
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/ensta.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/github.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<section class="cover" data-background="figures/background-blur.jpg"  data-state="no-title-footer no-progressbar has-dark-background">
+
+					<h2 id='coverh2'>Apprentissage Statistique appliqué au son</h2>
+					<h1  id='title_seminar'> Mi205 </h1>
+					<h3><a href="https://matfontaine.github.io/MI205", id='github_url'>matfontaine.github.io/MI205</a></h3>
+					<p id='coverauthors'>
+						Gianni FRANCHI, Mathieu FONTAINE<br />
+						<a href="mailto:gianni.franchi@ensta-paris.fr", class="mail">gianni.franchi@ensta-paris.fr,</a>
+						<a href="mailto:gianni.franchi@ensta-paris.fr", class="mail">mathieu.fontaine@telecom-paris.fr</a>
+					</p>
+					<p id="date">
+					Janvier-Mars 2023
+					</p>
+
+					<p id='intervenants'>
+						<span style="text-decoration-line:underline;"><b>Intervenants TD & TP : </b></span><br />
+						Louis BAHRMAN, Elio GRUTTADAURIA<br />
+						<a href="mailto:louis.bahrman@telecom-paris.fr">louis.bahrman@telecom-paris.fr,</a>
+						<a href="mailto:elio.gruttadauria@telecom-paris.fr">elio.gruttadauria@telecom-paris.fr</a>
+					</p>
+
+					<p>
+					<img src="css/theme/img/logo-ensta.svg" id="ensta" class="logo" alt="">
+					<img src="css/theme/img/logo-Telecom.svg" id="telecom" class="logo" alt="">
+					<aside class="notes">
+						<ul><li>We will consider historical audio source separation technique</li>
+									<li>e.g. no deep learning extensions or nonnegative matrix factorization</li>
+								<li>the Handbook for that course is available on the moodle (PAM/Audio_source_separation)</li>
+						</ul>
+					</aside>
+				</section>
+
+				<!-- Outline of the presentation -->
+				<section>
+					<h1> Organisation du module (1/2)</h1>
+					<h2>Evaluation</h2>
+
+					<h3> Examen sur table - 1h (CC, /10)</h3>
+					<ul>
+						<li>Date : 15 mars 2023</li>
+					</ul></br>
+					<h3> Présentation papier - 2h (Oral, /10)</h3>
+					<ul>
+						<li>Date : 15 mars 2023</li>
+					</ul>
+					</ul></br></br>
+
+     <p class="remarque">Addition des 2 notes $\implies$ note sur /20</p>               
+				</section>
+
+				<section>
+					<h1> Organisation du module (2/2)</h1>
+					<h2>Programme par tranche horaire (TH)</h2>
+					<ul>
+						<li>25.01.23 - Optimisation <em>(1H de cours + 2h de TD)</em></li>
+						<li>01.02.23 - Traitement du signal audio <em>(1h de cours + 2h de TD/TP)</em></li>
+						<li>08.02.23 - Espérance Maximisation <em>(1h de cours + 2h de TD)</em></li>
+						<li>15.02.23 - Factorisation de matrices non-negatives (NMF) <em>(1h de cours + 2h de TP)</em></li>
+						<li>22.02.23 - NMF Multicanal (MNMF) <em>(1h de cours + 2h de TD/TP)</em></li>
+						<li>08.03.23 - Processus Gaussien <em>(1h de cours + 2h de TP)</em></li>
+						<li><span style="color:red">Examen <em>(3h)</em></span></li>
+					
+				    </ul>
+					</section>
+
+					<section>
+						<h1>Matériel et activités</h1>
+						<h2>Bibliographie</h2>
+						<ul>
+							<li>Processus gaussiens pour la séparation de sources <a href="https://pastel.archives-ouvertes.fr/pastel-00790841/document"> Téléchargeable ici</a></li>
+							<li>Convex Optimization <a href="https://web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf">Téléchargeable ici</a></li>
+							<li>Pattern Recognition and Machine Learning <a href="https://www.microsoft.com/en-us/research/uploads/prod/2006/01/Bishop-Pattern-Recognition-and-Machine-Learning-2006.pdf">Téléchargeable ici</a></a></li>
+							<li>Cours de traitement du signal de Télécom (OASIS) : <a href="https://perso.telecom-paristech.fr/ladjal/PDFS/OASIS.pdf">Téléchargeable ici</a></li>
+						</ul>
+						<h2>Activités</h2>
+						<ul>
+							<li>Diaporama résumant le contenu du cours (démonstration au tableau)</li>
+							<li>TD + TP sur des exercices (à la maison ou traité directement en cours)</li>
+							<!-- <li>Petit QCM pendant le cours (non noté)
+							   </br>$\quad \rightarrow$ Matériel nécessaire : <b>Téléphone ou ordinateur</b> (test juste après)
+							</li> -->
+						</ul>
+						</section>
+					<section>
+						<h1>Compétences acquises</h1>
+						<ul>
+							<li>Comprendre des méthodes d'apprentissage statistiques</li>
+							<li>Appliquer ses méthodes pour un problème concret: la séparation de sources sonores</li>
+						</ul>
+					</section>
+					<!-- <section>
+						<h1> QCM Wooclap</h1>
+						<iframe style="pointer-events: none;" frameborder="0" height="500" width="100%" mozallowfullscreen src="https://app.wooclap.com/events/MDI104GRP2/"></iframe>
+						<ul>
+							<li>www.wooclap.com/MDI104GRP2 ou  @MDI104GRP2 par SMS et 1,2,3 ou 4 etc.</li>
+							<li>Les questions sont limitées par le temps <b>(n'est pas pris en compte dans la note)</b></li>
+						</ul>
+					</section> -->
+
+				<!-- Introduction -->
+				<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+					<h2 id='coverh2'>I - Optimisation</h2>
+
+				</section>
+				<section>
+					<h1>Motivations</h1>
+					<h2>Notations</h2>
+					<ul>
+						<li>$\Theta$ : ensemble des paramètres</li>
+						<li>$\ell$ : loss function</li>
+					</ul>
+					<h2>Apprentissage automatique</h2>
+					<ul>
+						<li>Dans le(s) cas <b>(non-)supervisé</b>, on a $(y_1, \dots, y_I)$ des données cibles et $y^\prime_i = f(x;\Theta)$ un estimateur pour une donnée d'entrée $x$.</li>
+						<li>Dans les deux cas, on cherche en général à minimiser une fonction de perte.</li>
+						<li>Dans le cas supervisé, il peut s'agir de minimiser :</li>
+						<center>$$
+							L(\Theta)= \frac{1}{I}\sum_{i=1}^{I}\ell(f(x_i;\Theta), y_i))
+						$$
+					</center>
+					<li>
+						Non-supervisé : plus délicat à rédiger...</br>
+						$\quad \rightarrow$ Clustering des données :  alors on peut se ramener à un cas supervisé.</li>
+						$\quad \rightarrow$ Approche statistique : negative log-likelihood minimization (cf algo EM etc.)</li>
+					</li>
+					</ul>
+					<p class="affirmation">Dans tous les cas, on doit minimiser une fonction $\implies$ <b>problème d'optimisation</b></p>
+
+				</section>
+				<!-- <section>
+					<h1>Motivations (2/2)</h1>
+					<h2>Illustration du problème supervisé</h2>
+					<h2>Illustration de deux problèmes non-supervisés</h2>
+				</section> -->
+				<section>
+					<h1>Fonction et Ensemble Convexe</h1>
+					Commençons par rappeler quelques definitions essentielles : 
+					<div class="exemple"> 
+						<div id="title"> Définition (fonction convexe, ensemble convexe) : </div> 
+						<ul style="margin-left:-1.8em;">
+							<li>Un ensemble $\mathcal{C}$ est <b>convexe</b> si pour tout point $A,B \in \mathcal{C}$ le segment
+								 $ \quad \quad\quad ~~~[A,B]= \{\theta A + (1-\theta) B , \theta \in [0,1]\}$ est inclus dans $\mathcal{C}$.</li>
+							<li>Une fonction $f$ est <b>convexe</b> si son domaine $dom(f)$ est convexe et 
+								<center>
+								$$
+								\forall \theta \in [0,1], \forall t_1,t_2 \in dom(f),~ f(\theta t_1 + (1-\theta)t_2) \leq \theta f(t_1) + (1-\theta)f(t_2)
+								$$
+							</center>
+							</li>
+						</ul>
+						</div>
+						<p>
+						<center><figure>
+							<img src="figures/images/convex.png" width="65%">
+							<figcaption><em>Figure : Convexe à gauche, Non-Convexe à droite. (Mais le minimum global existe)</em></figcaption>
+							</figure>
+							</center>
+						</p>
+				</section>
+
+				<section>
+					<h1>Gradient, Hessienne et matrice semi définie positive</h1>
+					On rappelle que :  </br>
+					<ul> 
+						<li>Le <b>gradient</b> est définit pour $\bold{x} = [x_1, \dots, x_d]^\top$ par 
+					<center style="margin-top:1em;">
+					$$\nabla f(\bold{x}) = [\frac{\partial f}{\partial x_1} (\bold{x}), \dots, \frac{\partial f}{\partial x_d} (\bold{x})]^\top$$
+				</center>
+			</li>
+
+				<li>La <b>Hessienne</b> est définie par 
+					<center style="margin-top:1em;">
+						$$\nabla^2 f(\bold{x})=\left[\begin{array}{cccc}
+						\frac{\partial^2 f}{\partial x_1^2}(\bold{x}) & \frac{\partial^2 f}{\partial x_1 \partial x_2}(\bold{x}) & \cdots & \frac{\partial^2 f}{\partial x_1 \partial x_d}(\bold{x}) \\
+						\vdots & \vdots & \ddots & \vdots \\
+						\frac{\partial^2 f}{\partial x_d \partial x_1}(\bold{x}) & \frac{\partial^2 f}{\partial x_d \partial x_2}(\bold{x}) & \cdots & \frac{\partial^2 f}{\partial x_d^2}(\bold{x})
+						\end{array}\right]$$
+					</center>		
+			</li>
+			<li>Une matrice $M \in \mathbb{R}^{d\times d}$ est <b>semie-définie positive</b> si pour tout 
+				$\bold{x} \in \mathbb{R}^d\backslash\{\bold{0}_d\}, \bold{x}^\top M \bold{x} \geq 0$. On note $M \geq 0$.
+	
+			</li>
+			<li>
+
+				De manière équivalente,  $M \geq 0 \Leftrightarrow$ l'ensemble des valeurs propres de $M$ (le spectre) est dans $\mathbb{R}^+$  <b>(Preuve ?)</b>
+			</li>
+		</ul>
+		</section>
+
+		<section>
+			<h1> Condition au 1er et 2nd ordre de la convexité</h1>
+			On a les résultats suivant pour une fonction convexe $f$ : 
+			<div class="exemple"> 
+				<div id="title"> Théorème (Condition au 1er et 2nd ordre de la convexité) : </div> 
+				<ul style="margin-left:-1.8em;">
+					<li> $f$ est convexe et différentiable ssi $dom(f)$ est convexe et $\forall x,y \in dom(f),$
+
+						<center>
+							$$
+							\forall x,y \in dom(f),~ f(y) \geq f(x) + \nabla f(x)^\top(y-x)
+							$$
+						</center>
+					</li>
+					<li> $f$ est  et deux fois différentiable ssi son domaine $dom(f)$ est convexe et 
+						$\quad\quad\quad\quad\forall x \in dom(f), \nabla^2 f(x) \geq 0$ 
+
+					</li>
+				</ul>
+				</div>
+			<p><b>Preuve:</b> Du premier point. Le second sera démontré en TD. </p>
+		</section>
+
+		<section>
+			<h1>Descente de Gradient</h1>
+		<ul>
+			<li>algorithme classique pour résoudre un problème d'optimisation</li>
+			<li>fonction convexe $ f$ alors  $- \nabla f$ est la direction optimale  </li>
+		</ul>
+		
+		<p>
+		L'algorithme se résume comme suit : 
+	    </p>
+		<div class="exemple"> 
+			<div id="title"> Algorithme descente de gradient : </div> 
+			<ul style="margin-left:-1.8em;">
+				<li>Valeur initiale $x_0$, learning rate $\gamma > 0$ et fonction convexe $f:\mathbb{R}^d \to \mathbb{R}$</li>
+				<li> On calcule $x_{1}, \dots, x_{T}$ itérativement comme suit :
+
+					<center>
+						$
+						x_1 \rightarrow x_0 - \gamma \nabla f(x_0) \\
+						\vdots \\
+						x_T \rightarrow x_{T-1} - \gamma \nabla f(x_{T-1})
+						$
+					</center>
+				</li>
+			</ul>
+			</div>
+			<p class="affirmation">si $f$ convexe et $\gamma$ choisit correctement, alors $x_T \underset{T\to \infty}{\rightarrow} x^\star$ 
+		avec $x^\star \in  \arg \min _{x \in \text{dom}(f)}f(x)$ une valeur optimale.
+			</p>
+	</section>
+	<section>
+		<h1>Fonction Lipischitzienne</h1>
+	La convergence de la descente de gradient sera montré dans le cas de fonction convexe et Lipschitzienne.
+
+	<div class="exemple"> 
+		<div id="title"> Définition[fonction continue lipschitzienne] </div> 
+		On dit qu'nune fonction $f$ est $K$-Lipschitzienne et continue ssi $\forall t_1, t_2 \in \text{dom}(f)$, 
+		<center>
+			$|f(t_1) - f(t_2)| \leq K ||t_1 - t_2 ||$
+		</center>
+		</div>
+	
+	<p><b>Remarque: </b>
+	<ul>
+		<li>Une fonction $K$-Lipschitzienne n'est pas forcément dérivable.</li>
+		<li> Si elle est cependant dérivable, sa dérivée est bornée par $K$ (démo au tableau)</li>
+	</ul>
+	</p>
+	Dans ce cas alors 
+	<div class="exemple"> 
+		<div id="title"> Théorème[convergence algorithme de descente du gradient] </div> 
+		Soit $f$ convexe et $K$-Lipschitzienne et $T \in \mathbb{N}$. 
+		Si on prend $\gamma = \frac{||x_1 - x^\star||_2}{K\sqrt{T}}$ alors: 
+		<center>
+			$$
+			f\left(\frac{1}{T}\sum_{t=1}^T x_t\right) - f(x^\star) \leq \frac{||x_1-x^\star||K}{\sqrt{T}}
+			$$
+		</center>
+	</div>
+	<p><b>Preuve: au tableau.</b></p>
+</section>
+<section>
+<h1>Problème sous contraintes</h1>
+Certains problèmes d'optimisation sont réalisés sous contrainte.
+C'est à dire que l'on souhaite par exemple résoudre :
+<center>
+	$$\underset{\bold{g}(x) < 0, \bold{h}(x) = 0}{\min} f(x)$$
+</center>
+avec $\bold{g} = (g_1, \dots, g_I)$ et $\bold{h}=  (h_1, \dots, h_E)$ des contraintes d'inégalités et d'égalités respectivement.
+
+<p>Dans ce cours, nous survolons les résultats généraux pour prouver:
+<ul>
+	<li>Si des solutions existent (et dans quel cas);</li>
+	<li>Comment déterminer ses solutions.</li>
+</ul>
+
+<p>Les preuves concrètes sont dans le Boyd.</p>
+</p>
+</section>
+
+<section>
+<h1>Condition d'existence de solutions</h1>
+Une première question est quand avons-nous existence d'au moins une solution ?
+
+<div class="exemple">
+	<div id="title"> Définition[Fonctions Coercives] </div>
+	$f:\mathbb{R}^n \to \mathbb{R}$ est <b>coercive</b> si
+	<center>
+		$$
+		\lim_{||x|| \to +\infty}f(x) = +\infty
+		$$
+	</center>
+</div>
+<div class="exemple">
+	<div id="title"> Théorème[Existence d'une solution] </div>
+	Soit $U$ une partie non vide et fermée de $\mathbb{R}^n$ et $f:\mathbb{R}^n \to \mathbb{R}$ continue, 
+	 (et coercive  si $U$ est non borné). Alors il existe au moins $x^\star \in U$ tel que
+	<center>
+		$$
+		f(x^\star) = \underset{x\in U}{\inf} f(x)
+		$$
+	</center>
+</div>
+<p><b>Preuve:</b> Au tableau.</p>
+
+<div class="exemple">
+	<div id="title"> Théorème[Condition nécessaire d'extremum local] </div>
+	Soit $f:\Omega \subset \mathbb{R}^n \to \mathbb{R}$ avec $\Omega$ un ouvert de $\mathbb{R}^n$. Si $f$ admet un extremum local
+	 en un point $x \in \Omega$ et si elle est différentiable en $x$ alors:
+	<center>
+		$$
+		\nabla f(x) =0
+		$$
+	</center>
+	$x$ est un <b>point critique</b> de $f$ si $\nabla f(x) = 0$
+</div>
+
+</section>
+<section>
+	<h1>Cas des fonctions convexes</h1>
+	<h2>Cas convexe</h2>
+Si on se place dans le cas où $f$ est une fonction convexe et que $U$ est un convexe On a le résultat suivant :
+<div class="exemple">
+	<div id="title"> Théorème[minimum de fonction convexe] </div>
+	Avec les hypothèses précentes  $x \in U$ est un minimum global ssi. $\nabla f(x) =0$
+</div>
+
+</section>
+<section>
+<h1>Fonction Lagrangienne,  Karush-Kuhn-Tucker</h1>
+On reprend notre problème :
+<center>
+	$$\underset{\bold{g}(x) < 0, \bold{h}(x) = 0}{\min} f(x)$$
+</center>
+<div class="exemple">
+	<div id="title"> Définition [Lagrangien] </div>
+	Le <b>Lagrangien</b> avec $\lambda = (\lambda_1, \dots, \lambda_E)^\top$ et $\mu = (\mu_1, \dots, \mu_I)^\top$ du problème précédent est défini par :
+	<center>
+		$$\mathcal{L}(x,\lambda, \mu) = f(x) + \sum_{e=1}^{E} \lambda_{e}h_{e}(x) + \sum_{i=1}^{I} \mu_{i}g_{i}(x)$$
+	</center>
+</div>
+
+En un point critique du Lagrangien $x^\star$, on peut montrer qu'il existe $\lambda \in \mathbb{R}^E, \mu \in \mathbb{R}^I$ tel que: 
+<center>
+	$$\begin{cases}
+	\nabla\mathcal{L}(x^\star,\lambda, \mu) = \nabla f(x^\star) +
+	 \sum_{e=1}^{E} \lambda_{e} \nabla h_{e}(x^\star) + \sum_{i=1}^{I} \mu_{i}\nabla g_{i}(x^\star) = 0 \\
+	 \mu_{i} \geq 0, \mu_{i}g_i(x^\star)=0
+	 \end{cases}$$
+</center>
+Ces conditions s'appellent conditions de Karush-Kuhn-Tucker. </br>
+<div class="remarque">
+Il peut cependant arriver que de tels conditions ne soient pas totalement satisfaites. D'autres hypothèses doivent êtres rajoutées
+pour que les points soient <b>qualifiées</b>.
+</div>
+</section>
+
+<section>
+<h1 style="margin-top:-1em;">Qualifications de contraintes</h1>
+On cite ici deux qualifications de contraintes importantes (mais d'autres existent dans la littérature).
+On définit $I^\star$ l'ensemble des entiers tel que $g_i(x^\star)=0$.
+<h2>Qualification des contraintes d'indépendance linéaire (LICQ)</h2>
+
+
+<div class="exemple">
+	<div id="title"> Définition [LICQ] </div>
+	On dit que les LICQ sont satisfaites en $x^\star$ si la matrice 
+	<center>$$
+	\left(\begin{array}{c}
+\nabla\boldsymbol{h}\left(x^{\star}\right)\\
+\nabla \bold{g}_{I^{\star}}\left(x^{\star}\right)
+\end{array}\right)
+	$$</center>
+est de rang plein ligne (le rang de cette matrice est égale au nombre de lignes de la matrice) avec $\nabla \bold{g}_{I^\star}(x^\star)$ 
+est la matrice dont les lignes sont les $\nabla g_{i^\star}(x^\star)$ avec $i^\star \in I^\star$
+</div>
+
+<h2>Qualification des contraintes de Mangasarian-Fromovitz (MFCQ)</h2>
+<div class="exemple">
+	<div id="title"> Définition [MFCQ] </div>
+	On dit que les MFCQ sont satisfaites en $x^\star$ si la matrice $\nabla\boldsymbol{h}\left(x^{\star}\right)$ est de plein rang et 
+	$\exists v \in \mathbb{R}^E, \left<\nabla \bold{g}_{I^\star}(x^\star),v \right> <0, \left<\nabla \bold{h}(x^\star),v \right>  = 0$ 
+</div>
+<p><b>Remarque :</b> LICQ $\implies$ MFCQ</p>
+</section>
+
+<section>
+<h1>Problème avec contraintes d'égalités</h1>
+On considère le problème : $\underset{\bold{h}(x) = 0}{\min} f(x)$
+
+<div class="exemple"> 
+	<div id="title"> Théorème [Condition de Lagrange] </div> 
+	Si $x^\star$ est un minimum local de $f$ avec les LICQ, alors il existe un unique $\lambda \in \mathbb{R}^E_{+}$ tel que :
+	<center>
+		$$\nabla\mathcal{L}(x^\star,\lambda) = 0$$
+	</center>  
+</div>
+<p><b>Attention ! 
+Il s'agit en général d'un point-selle 
+(pas forcément le minimum global)</b></p>
+Les conditions de KKT au final sont bien satisfaites (sauf la dernière ligne car nous n'avons pas de contraintes d'inégalités)
+</section>
+
+<section>
+	<h1>Problème avec contraintes mixtes</h1>
+	On considère le problème : <center>
+		$$\underset{\bold{g}(x) < 0, \bold{h}(x) = 0}{\min} f(x)$$
+	</center>
+	
+	<div class="exemple"> 
+		<div id="title"> Théorème </div> 
+		Si $x^\star$ est un minimum local de $f$ avec les LICQ, alors il existe des uniques $\lambda \in \mathbb{R}^E_{+}, \mu \in \mathbb{R}^I$ tel que :
+		les conditions de KKT soient vérifiées.
+	</div>
+
+	<p>Cependant, les LICQ sont parfois fortes à vérifier on a donc alternativement le résultat suivant :</p>
+
+	<div class="exemple"> 
+		<div id="title"> Théorème </div> 
+		$x^\star$ est un minimum local de $f$ avec les MFCQ, si et seulement si il existe $\lambda \in \mathbb{R}^E_{+}, \mu \in \mathbb{R}^I$ tel que :
+		les conditions de KKT soient vérifiées. Le nombre de vecteurs est non vide et borné.
+	</div>
+
+	</section>
+
+<!-- TRAITEMENT DU SIGNAL -->
+	<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+		<h2 id='coverh2'>II/1 - Traitement du signal audio : généralités </h2>
+	</section>
+
+	<section>
+		<h1>QU'est-ce qu'un signal ?</h1>
+			<img src="figures/images/montage_signal.png" alt="" style="background-color ;" width="100%">
+			<div class="remarque" style="margin-top: 1em;">Un <b>signal</b> est une information acquise par des <b>capteurs</b> (<em>e.g.</em>, microphones, SAR etc.)</div>
+
+</section>
+
+<section data-markdown>
+		<textarea data-template>
+			# Signaux deterministes et aléatoires
+			## Signaux deterministes
+			* La valeur pour tout temps $t$ est donnée (periodicité, symmétrie)
+			* Signal très simple à reconstruire en connaissant une période
+
+			## Signaux aléatoires
+			* Pour un signal $n \mapsto x(n)$, chaque échantillon n'est pas prédictible parfaitement
+			* En général, $x(n) \sim \mathcal{L}_n$ ce qui signifie que  "suit une loi de probabilité $\mathcal{L}_n$"
+
+			<img src="figures/D-R.jpg" alt="" style="background-color ; margin-top: 0.5em;" width="95%">
+		</textarea>
+</section>
+
+	<section>
+		<h1>Représentation temporelle <span style="font-style:italic;">vs.</span> domain temps-fréquence</h1>
+			  <div class="affirmation" style="margin-top:-0.2em; margin-bottom:0.5em;">$t$ represente le <span style="font-weight:bold;">temps</span> et $f$ la <span style="font-weight:bold;">fréquence</span> </div>
+				  <div class='multiCol'>
+					  <div class='col'>
+						  <span style="font-weight:bold;">Représentation temporelle</span></br>
+			&nbsp&nbsp&nbsp $\rightarrow~~~ x\left(t\right)\in \mathbb{R}$ est la représentation discrète d'un signal temporelle échantillonné avec une période $\tau$</br>
+						  <video style="float:left; margin-top:1em; margin-bottom:1em; box-shadow: 5px 5px 15px grey;" controls width='100%'>
+							  <source data-src="figures/video/time_domain.webm" type="video/webm" />
+						  </video>
+		<ol>
+							  <li style="color:black; list-style-type:circle;">Directement la représentation de l'amplitude</li>
+						  </ol>
+					  </div>
+					  <div class='col'>
+					  <span style="font-weight:bold;">Transformée de Fourier à court terme (TFCT)</span></br>
+						  &nbsp&nbsp&nbsp $\rightarrow~~~$ transformée de Fourier + 
+						  multiplication avec une <span style="font-style: italic;">fenêtre</span> $w$ pour chaque trame temporelle :</br>
+
+						  <span style = "text-align:center;">$$x\left(f,t\right) = \int_{-\infty}^{+\infty}x\left(\tau\right)w\left(\tau-t\right)e^{-2i\pi f\tau}d\tau \in \mathbb{C}$$</span>
+						  <video style="float:left; margin-top:1em; margin-bottom:1em; box-shadow: 5px 5px 15px grey;" controls width='100%'>
+							  <source data-src="figures/video/TF_domain.webm" type="video/webm" />
+						  </video>
+						  <ol>
+							  <li style="color:black; list-style-type:circle;">Plus interprétable</li>
+						  </ol>
+					  </div>
+  </div>
+	  </section>
+
+	<section>
+		<h1>La transformée de Fourier discrète</h1>
+	Soit un signal discret $x_0,\dots,x_{N-1}$. Sa transformée de Fourier (discrète) est: 
+
+	<center>$$
+	x(f) = \sum_{n=0}^{N-1}x_ne^{-i\frac{2\pi f n}{N}}
+	$$
+	</center>
+	<ul>
+		<li>On obtient une représentation fréquentielle du signal</li>
+		<li>Complexité algorithmique : $O(N^2)$</li>
+	</ul></br>
+	Il existe une version édulcorée qui réduit la complexité $O(N^2)$ en $O(N\log(N))\\$ (cf. <a href ="https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm">Cooley-Tukey FFT algorithm</a>)</br>
+	<center><figure>
+	<img src="figures/images/fft.jpg" width="65%">
+	<figcaption><em>Figure : champ d'une Baleine. On remarque l'activité dans les basses fréquences.</em></figcaption>
+	</figure>
+	</center>
+ </section>
+
+ <section>
+	<h1>Transformée de Fourier à Court Terme (TFCT)</h1>
+	<ul>
+		<li>Découpage d'un signal en plusieurs séquences</li>
+		<li>multiplication par un fenêtrage (Pourquoi ? <em>cf.</em> Slide suivante) </li>
+		<li>FFT sur chacune des séquences</li>
+	</ul>
+	<center><figure>
+		<img src="figures/images/STFT.png" width="50%">
+		<figcaption><em>TFCT d'un signal de parole (selon Laroche)</em></figcaption>
+		</figure>
+	</center>
+ <div class="remarque">On obtient un signal "temps-fréquence" $x(f,t)$</div>
+</section>
+<section>
+	<h1>Pourquoi multiplier par une fenêtre ?</h1>
+	Considérons le signal suivant supposé échantillonné à une fréquence $1/T$ :
+	<center>
+	$$
+	 x(t) = A_0e^{2i\pi\nu_0t} + A_1e^{2i\pi\nu_1t}  
+	$$
+</center>
+Posons $\nu_0 = 0.1, \nu_1=0.13$ et $A_0=A_1/10$.  
+<ul>
+	<li>A gauche: difficile d'observer le second lobe principale correspondant à la première onde (les lobes secondaires de la seconde onde les recouvrent)</li>
+	<li>A droite ($x(t)w(t)$ avec $w$ une fenêtre de Hamming): on observe que :</br>
+		$\quad \rightarrow$ Les deux lobes principaux sont identifiables </br>
+		$\quad \rightarrow$ Légère perte de résolution pour les lobes principaux
+	</li>
+<div class="multiCol">
+	<div class="col">
+		<center><figure>
+			<img src="figures/images/onde_low.png" width="60%">
+			<figcaption><em>FFT avec un échantillonnage $T=30$</em></figcaption>
+			</figure>
+		</center>
+	</div>
+	<div class="col">
+		<center><figure>
+			<img src="figures/images/onde_high.png" width="62%">
+			<figcaption><em>Hamming et FFT avec $T=30$</em></figcaption>
+			</figure>
+		</center>		
+	</div>
+</div>
+</ul>
+</section>
+<section>
+	<h1>Spectrogramme de puissance (SP)</h1>
+	<ul><li>Module au carré des coefficients</li>
+	<center>$$
+		p(f,t) = |x(f,t)|^2 \qquad\qquad\qquad \texttt{(Spectrogramme de Puissance)}
+		$$
+	</center>
+	<li>Pour une meilleure représentation, on calcule le log du SP.</li>
+	</ul>
+	<center><figure>
+		<img src="figures/images/spectrogram.png" width="70%">
+		<figcaption><em>Figure : Log-Spectrogramme d'un signal de parole.</em></figcaption>
+		</figure>
+		</center>
+	</section>
+
+	<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+		<h2 id='coverh2'>II/2 - Traitement du signal audio : séparation de sources (généralités) </h2>
+	</section>	
+
+	<section>
+		<h1>Séparation de sources en musique</h1>
+		<center><figure>
+			<img src="figures/images/audio_source_separation.png" width="80%">
+			<figcaption><em>Séparation de sources musicales</em></figcaption>
+			</figure>
+		</center>
+		<p>
+		<div class="remarque">Exemples d'applications de la séparation de sources musicales ?</div>	
+	</p>
+	</section>
+	
+
+	<section>
+		<h2>Séparation de sources (général)</h2>
+
+		<ul>
+			<li>Art d'estimer des signaux sources, souvent supposés indépendants, via l'observation d'un ou plusieurs mélanges de ces sources</li>
+	 </ul>
+		<h2>Exemples d'applications</h2>
+		<ul>
+			<li>Débruitage/séparation de locuteurs
+			<div class="multiCol" style="margin-top:0.1em">
+				<div class="col">
+					<label for="no_sp">
+					&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp parole bruité<br>
+					</label>
+						<audio id="no_sp" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/no_sp.wav"/>
+							</audio>
+							<label for="multi_sp">
+							<br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp	multi locuteur<br>
+							</label>
+								<audio id="multi_sp" controls>
+								<source
+										type="audio/mpeg"
+										src="multimedia/audio/multi_sp.wav"/>
+									</audio>
+				</div>
+				<div class="col">
+					<label for="cl_sp">
+					&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp parole propre<br>
+					</label>
+						<audio id="cl_sp" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/cl_sp.wav"/>
+							</audio>
+							<label for="one_sp">
+							<br>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp	un locuteur<br>
+							</label>
+								<audio id="one_sp" controls>
+								<source
+										type="audio/mpeg"
+										src="multimedia/audio/one_sp.wav"/>
+									</audio>
+				</div></li>
+			<li>Séparation d'instruments de musique
+			<div class="multiCol" style="margin-top:-0.1em">
+				<div class="col">
+					<label for="mix">
+					&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp chanson<br>
+					</label>
+						<audio id="mix" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/mixture.wav"/>
+							</audio>
+								<label for="drums">
+								<br>&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp&nbsp batterie<br>
+								</label>
+									<audio id="drums" controls>
+									<source
+											type="audio/mpeg"
+											src="multimedia/audio/drums.wav"/>
+										</audio>
+
+				</div>
+				<div class="col">
+					<label for="vocals">
+					&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp&nbsp voix<br>
+					</label>
+						<audio id="vocals" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/vocals.wav"/>
+							</audio>
+					<label for="bass">
+					<br>&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp&nbsp basse<br>
+					</label>
+						<audio id="bass" controls>
+						<source
+								type="audio/mpeg"
+								src="multimedia/audio/bass.wav"/>
+							</audio>
+				</div>
+			</li>
+	 </ul>
+	 <aside class="notes">
+		 <ul><li>Also pitch shifting or time-scaling</li>
+			 <li>respatialization etc.</li>
+		 </ul>
+	 </aside>
+	</section>
+
+	<section>
+		<h2>Typologie des modèles de mélanges</h2>
+
+			<h3 style='margin-top:0.5em;'>Notations</h3>
+			<ul>
+				<li>
+					Observations: $M$ mélanges $x_m(t)$ concaténés dans un vecteur $\bold{x}(t)$
+				</li>
+				<li>
+					inconnus: $N$ sources ponctuelles $s_n(t)$ concaténé dans un vecteur $\bold{s}(t)$
+				</li>
+				<li>
+					Modèle de mélange général: Une fonction $\mathcal{A}$ qui transforme $\bold{s}(t)$ en $\bold{x}(t)$
+				</li>
+			</ul>
+
+			<h3 style='margin-top:0.5em;'>Deux types</h3>
+			<ul>
+
+				<li>mélange linéaire instantanée : $\bold{x}(t)=\bold{A}\bold{s}(t) \\
+					\quad\rightarrow \mathcal{A}$ est définie par la "matrice de mélange"
+					 $\bold{A}$ (de dimension $M\times N$)
+				</li>
+				<li>mélange convolutif : $x_m(t) = \sum_{n=1}^{N} a_{nm}(t) \star  s_n(t)$</li>
+
+			</ul>
+
+			<h3 style='margin-top:0.5em;'>Vocabulaire</h3>
+			<ul>
+				<li>
+					mélanges déterminés : $M=N$
+				</li>
+				<li>
+					mélanges surdéterminés : $M>N$
+				</li>
+				<li>
+					mélanges sous-déterminés : $M < N$
+				</li>
+			</ul>
+			<aside class="notes">
+
+			</aside>
+			<aside class="notes">
+				<ul><li>stationnary+ linear -> convolution product</li>
+					<li>length of the impulse response: this is the memory</li>
+					<li>memory length equal to zero : instantaneous mixtures (IM)</li>
+					<li>IM works well in general for EEG of MEG</li>
+					<li>Problematic for audio application because of the reverberation</li>
+				</ul>
+
+				<ul><li>$M=K$ it ise generally inversible</li>
+					<li>$M> K$: a unique solution can be found in the least squares sense</li>
+					<li>$M> K$: infinite number of solution : we need more informations</li>
+				</ul>
+			</aside>
+</section>
+
+
+
+	<section>
+		<h2>Vecteurs aléatoires</h2>
+		<h3 style='margin-top:0.5em;'>Notations</h3>
+		$\bold{x}$ est un vecteur aléatoire de dimension $M$.
+		<ul>
+			<li>les crochets $\phi[\bold{x}]$ dénotent une fonction de $p(\bold{x})$</li>
+			<li>Moyenne : $\mu_{x}=\mathbb{E}[\bold{x}]$</li>
+			<li>Matrice de covariance : $\Sigma_{xx}=\mathbb{E}[(\bold{x}-\mu_x)(\bold{x}-\mu_x)^\mathsf{H}]$</li>
+		</ul>
+		<h2>Vecteur gaussien complexe circulaire</h2>
+		<ul>
+			<li> $\bold{x}$ où $\Re(\bold{x})$ et $\Im(\bold{x})$ sont gaussiens et $e^{i\phi}\bold{x}  \overset{d}{=} \bold{x}, \forall \phi \in [0,2\pi[$</li>
+
+
+			<li>Densité de probabilité (définie si $\Sigma_{xx}$ est inversible)
+				<center style="margin-top:0.3em; margin-bottom:0.3em;">$$
+				p(\bold{x})=\frac{1}{\pi^{M}\det(\Sigma_{xx})}
+				\exp((\bold{x}-\mu_x)^{\mathsf{H}}\Sigma_{xx}^{-1}(\bold{x} - \mu_x))$$</center>
+			</li>
+			<li>On notera $\bold{x} \sim \mathcal{N}_{\mathbb{C}}^{M}(\mu_x, \Sigma_{xx})$ et $\bold{x} \sim \mathcal{N}_{\mathbb{C}}^{M}(\Sigma_{xx})$ si $\mu_x=0$ </li>
+			<li>Si $\mu_x=0$ $\implies$ vecteur gaussien complexe circulaire centré (GCCC)</li>
+				<!-- <h3 style='margin-top:0.5em;'>Cumulants</h3>
+				<ul>
+					<li style='margin-top:-0.8em;'>Définition: $
+						\ln\left(\phi_x(\bold{f})\right) =
+						 \sum\limits_{n=1}^{+\infty}\frac{(-2i\pi)^n}{n!}\sum\limits_{k_1=1}^M\dots\sum\limits_{k_n=1}^M
+						 \kappa^{n}_{k_{1}\dots k_{n}}[\bold{x}]f_{k_1}\dots f_{k_n}$</li>
+					<li>$\kappa^n[\bold{x}]$ est un tenseur d'ordre $n$ de coefficients $\kappa^{n}_{k_{1}\dots k_{n}}[\bold{x}]$</li>
+					<li>$\kappa^1[\bold{x}]$ est la moyenne, $\kappa^2[\bold{x}]$ est la matrice de covariance</li>
+					<li> $p(\bold{x})$ est symmétrique $\implies$ $\kappa^{n}[\bold{x}]=0, \forall n~ \mathrm{impair}$</li>
+					<li>Le rapport $\kappa^4_{k,k,k,k}[\bold{x}]/\kappa^2_{k,k}[\bold{x}]$ est appelé le "kurtosis"</li>
+				</ul> -->
+		</section>
+
+	
+	<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+		<h2 id='coverh2'>II/3 - Traitement du signal audio : séparation de sources (ICA) </h2>
+	</section>	
+
+	<section>
+		<h2>Séparation de sources aveugle (BSS) (1/2)</h2>
+		<h3 style='margin-top:0.5em;'>Modèle d'observation</h3>
+		<ul>
+			<li> Mélange linéaire instantané :
+				<center>$$\forall t, \bold{x}(t)=\bold{A}\bold{s}(t)$$</center>
+				$\quad\rightarrow\bold{A}\in\mathbb{R}^{M\times K}$: "matrice de mélange"
+			</li>
+			<li>
+				Les sources sont supposées iid. :
+				<center>$$p(\{s_n(t)\}_{n,t})=\prod\limits_{n=1}^{N}\prod\limits_{t=1}^{T}p_n(s_n(t))$$</center>
+			</li>
+		</ul>
+		<div class="remarque" style='margin-top:0.5em;'> Problème de la BSS : estimer $\bold{A}$ et les $\bold{s}(t)$ étant donné $\bold{x}(t)$ </div>
+		<aside class="notes">
+			<ul><li> BSS: we know very little about the sources</li>
+				<li>just assumed to be statistically independent</li>
+				<li>e.g. denoising application the background environmental noise and speaker are in general independent</li>
+	<li>IID assumption:ignore power variation over time or spectral dynamics</li>
+			</ul>
+		</aside>
+	
+	 </section>
+	
+	
+	 <section>
+		<h2>Séparation de sources aveugle (BSS) (2/2)</h2>
+		<h3 style='margin-top:0.5em;'>Non-mixing matrix</h3>
+		<ul>
+		<li>
+			Une matrice $\bold{C}$ de dimension $N\times N$ est <b>non-mixing</b> ssi. elle admet une unique entrée non-nulle pour chaque ligne et chaque colonne.
+		</li>
+		<li>
+			Si $\tilde{\bold{s}}(t) = \bold{C}\bold{s}(t)$ et $\tilde{\bold{A}}=\bold{A}\bold{C}^{-1}$, alors $\bold{x}(t)= \tilde{\bold{A}}\tilde{\bold{s}}(t)$
+			est une autre décomposition admissible des observations. </br>
+			$\quad\rightarrow$ Les sources peuvent donc être estimé à une <b>permutation</b> et <b>à un facteur multiplicatif</b> près.
+		</li>
+		</ul>
+		<aside class="notes">
+			<ul><li> BSS: can be really find $s$ and $A$ from $x$</li>
+				<li>$P$ permutation matrix, then $\tilde{A} = AP^{-1}$ and $\tilde{s}(t) = Ps(t)$ also works</li>
+				<li>$D$ inversible diagonal matrix, then $\tilde{D} = DP^{-1}$ and $\tilde{s}(t) = Ds(t)$ also works</li>
+				<li>At least scale and permutation indetermacies</li>
+	<li>product of $P$ and inversible diagonal matrix $D$</li>
+			</ul>
+		</aside>
+	 </section>
+
+	 <section>
+		<h2>Séparation de sources linéaire</h2>
+		<h3 style='margin-top:0.5em;'>Model</h3>
+		<ul>
+		<li>
+			Soit
+			<center>$$\bold{y}(t)=\bold{B}\bold{x}(t)$$</center>
+			$\quad\rightarrow\bold{B}\in\mathbb{R}^{N\times M}$: "matrice de séparation"
+		</li>
+	  </ul>
+			<h3 style='margin-top:0.5em;'>Faisabilité</h3>
+	
+			<ul>
+				<li>
+	La séparation linéaire est faisable si $\mathrm{rank}(\bold{A})=N$
+				</li>
+		<li> Sous les conditions précédentes, on obtient :
+		<center style="margin-top:0.5em; margin-left:1.5em;">$$\bold{B} =
+			\begin{cases}
+			\bold{B} = \bold{A}^{-1} & \mathrm{si} ~ M=N \\
+			\bold{B} = \bold{A}^{\dagger} = (\bold{A}^\top\bold{A})^{-1}\bold{A}^\top & \mathrm{si} ~ M>N  \quad\quad \texttt{(pseudo-inverse)}\\
+			\emptyset & \mathrm{si} ~ M< N
+			\end{cases}
+			$$</center>
+		</li>
+		</ul>
+	<div class="remarque" style='margin-top:0.5em;'> Dans le cas de la BSS, la matrice $\bold{A}$ est inconnue </div>
+	 </section>
+
+	 <section>
+		<h2>Indepedent component analysis (ICA) (1/2) </h2>
+		<h3 style='margin-top:0.5em;'>Problem Statement</h3>
+		<ul>
+		   <li>
+			   $\bold{A}$ est inconnue et on cherche $\bold{B}$ qui rendent les $y_n(t)$ indépendants (ICA)
+		</li>
+		<li>
+			On obtient l'équation :
+			<center>$$\bold{y}(t) = \bold{C}\bold{s}(t)$$</center>
+			$\quad\rightarrow$ où $\bold{C}=\bold{BA}$ </br>
+			$\quad\rightarrow$ $\bold{C}$ est non-mixing $\implies$ le problème est résolu.
+		</li>
+		</ul>
+		   <img src="figures/images/ICA.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=40%>
+		 <!-- <h3 style='margin-top:0.5em;'>Theorem (identifiability)</h3>
+		   <ul>
+			   <li>
+				   Let $\{s_k(t)\}_{k=1\dots K}$ be $K$ IID sources, among which at most one is Gaussian and:
+				   <center>$$
+					   \bold{y}(t) = \bold{C}\bold{s}(t)
+				   $$</center>
+				   with $\bold{C}$ inversible (i.e. $M \geq K$).
+			   </li>
+		   </ul>
+		   <div class="remark" style='margin-top:0.5em;'> If signal $y_k(t)$  are independent, then $\bold{C}$ is non-mixing</div> -->
+		</section>
+	   
+		<section>
+		<h2>Indepedent component analysis (ICA) (2/2)</h2>
+		   <img src="figures/images/ICA.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=40%>
+	   
+	 <div class="exemple">
+		<div id="title"> Théorème [d'identifiabilité] </div>
+		Soit $\{s_n(t)\}_{n=1\dots N}$ les $N$  sources iid., avec au plus une source Gaussienne et :
+		<center>$$
+			\bold{y}(t) = \bold{C}\bold{s}(t)
+		$$</center>
+		avec $\bold{C}$ inversible (i.e. $M \geq N$).
+	</li>
+</ul>
+<p>Si les $y_n(t)$  sont indépendants, alors $\bold{C}$ est non-mixing</p>
+	 </div>
+
+		</section>
+	   
+		<section>
+		<h2>Blanchiment (1/3)</h2>
+		<ul>
+			<li> Modèle :<br>
+				$
+				\begin{cases}
+				\mathbb{E}[\bold{s}(t)]=0 \\
+				\bold{R}_{ss}(\tau) = \mathbb{E}[\bold{s}(t+\tau)\bold{s}(t)^\top] = \mathrm{diag}(r_{s_k}(\tau))
+				\end{cases} \quad\texttt{(processus centrée SSL)}
+				$
+			</li>
+			<li> <b>Problème canonique (PC)</b>: on suppose que  $\Sigma_{ss}=\bold{R}_{ss}(0)=\bold{I}$</li>
+			<li>
+				Alors
+				<center>$$
+			\Sigma_{xx} = \bold{A}\Sigma_{ss}\bold{A}^\top =\bold{A}\bold{A}^\top
+				$$</center>
+				$\quad\rightarrow$ $\bold{A}$ est une racine carré de la matrice $\bold{\Sigma}_{xx}$
+			 </li>
+
+		</ul>
+		<aside class="notes">
+			<ul><li> Two step for ICA the first one is to decorrelate the observed mixture signals</li>
+			   <li>The second one is to make the whitened signals independent</li>
+				<li> CP: the sources signals are IID so Diagonal assumption is OK</li>
+				<li>Moreover, we know we can retrieve only up to a multiplicative factor</li>
+			</ul>
+		</aside>
+		</section>
+	   
+		<section>
+		<h2>Blanchiment (2/3)</h2>
+		 <h3 style='margin-top:0.5em;'>Decorrelation (Blanchiment) de $\Sigma_{xx}$</h3>
+		  <ul>
+				<li>
+					$\Sigma_{xx}$ est diagonalisable dans une base orthonormée :
+					<center>$$
+					   \Sigma_{xx} = \bold{Q}\Lambda^2\bold{Q}^\top
+					$$</center>
+	   
+					$\quad\rightarrow \Lambda= \mathrm{diag}(\lambda_1, \dots, \lambda_M)$
+					avec $\lambda_1 \geq \dots \geq \lambda_N >\lambda_{N+1}  = \dots =\lambda_{M} = 0$
+					$\quad\quad (\mathrm{rank}(\Sigma_{xx}) = N)$
+				</li>
+				<li>
+					Soit $\bold{S} = \bold{Q}_{(:, 1:N)}\Lambda_{(1:N, 1:N)} \in \mathbb{R}^{M\times N}$ alors $\Sigma_{xx} = \bold{S}\bold{S}^\top$
+				</li>
+				<li>
+					Soit $\bold{W} = \bold{S}^{\dagger}, \bold{z}(t) = \bold{W}\bold{x}(t)$ alors :
+					 <center>$$
+					   \begin{cases}
+					   \mathbb{E}[\bold{z}(t)] = 0, \\
+					   \Sigma_{zz} = \bold{W}\Sigma_{xx}\bold{W}^\top = \bold{I}
+					   \end{cases}\quad\quad\texttt{(z est dit "blanc")}
+					   $$</center>
+				</li>
+			</ul>
+			<aside class="notes">
+			   <ul><li> $\bold{W}$ is a whitening matrix</li>
+			   </ul>
+			</aside>
+		</section>
+	   
+		<section>
+		<h2>Blanchiment (3/3)</h2>
+		 <h3 style='margin-top:0.5em;'>Conclusion</h3>
+		  <ul>
+				<li>
+			  Sans perte de généralité : $\bold{U} := \bold{WA}$ est une matrice de rotation ($\bold{UU}^\top = \bold{I}$)
+				</li>
+				<li>
+				   Alors :
+				   <center>$$
+					   \bold{y}(t) = \bold{U}^\top \bold{z}(t) = \bold{U}^\top\bold{W}\bold{x}(t) = \bold{s}(t)
+				   $$</center>
+				</li>
+				<li>
+					On peut supposer que $\bold{B} = \bold{U}^\top\bold{W}$ où $\bold{U}$ est une matrice de rotation
+			   </li>
+			   <li>De plus  $\forall \tau \in \mathbb{Z}, \bold{R}_{zz}(\tau) = \bold{U}\bold{R}_{ss}(\tau)\bold{U}^\top$</li>
+			</ul>
+				<img src="figures/images/whitening_ICA.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=40%>
+				<div class="remarque" style='margin-top:0.5em; margin-bottom:0.5em;'>
+					La diagonalisation jointe de $\bold{R}_{zz}(\tau)$ pour plusieurs $\tau$ va donner $\bold{U}$
+				</div> 
+				
+				<aside class="notes">
+				<ul><li> In fact $\bold{U}$ is an orthonormal matrix but because of the multiplicative scalar uncertainty, we assume that $\det(U)=1$</li>
+			   </ul>
+			 </aside>
+		</section>
+
+		<section>
+			<h2>Diagonalisation jointe</h2>
+			 <div class="exemple">
+				<div id="title">Théorème [d'unicité de la diagonalisation jointe]</div>
+
+				Soit $\{\bold{R}_{zz}(\tau)\}_{\tau} \in \mathbb{R}^{N\times N}$ telles que :
+				<center>$$
+				\bold{R}_{zz}(\tau) = \bold{U}\bold{R_{ss}(\tau)}\bold{U}^\top
+				$$</center>
+				$\bold{U}$ est unique $\Leftrightarrow \forall 1\leq k \neq l \leq K~ \exists \tau, r_{s_k}(\tau) \neq r_{s_l}(\tau)$	
+			 </div>
+
+
+
+
+			 <h3 style='margin-top:0.5em;'>Méthode de diagonalisation jointe</h3>
+			 <ul>
+				 <li> Minimiser :
+					 $J(\bold{U}) = \sum_\tau\mid\mid \bold{U}^\top\bold{R}_{zz}(\tau)\bold{U} - \mathrm{diag}(\bold{U}^\top\bold{R}_{zz}(\tau)\bold{U}) \mid\mid_{F}^2$
+				</li>
+				<li>Parametrisation de $\bold{U}$ comme des rotations de  Givens et descente de gradient par coordonnées</li>
+			 </ul>
+			 <div class="references" style="float:left; margin-top:0.2em;">
+				<ul><li>A. Belouchrani, "A blind source separation technique using second-order statistics," in IEEE TSP (1997)</li>
+			</ul>
+		</div>
+			 <aside class="notes">
+				 <ul><li>$U$ is unique up to a non-mixing matrix</li>
+					 <li> We relax the source model that it is only identifiable from its second order statistic.</li>
+				 </ul>
+				</aside>
+			</section>
+
+		<section>
+			<h2>Algorithme Second Order Blind Identification (SOBI)</h2>
+			<ol>
+				<li>Estimation de $\Sigma_{xx}$</li>
+				<li>Diagonalisation: $\Sigma_{xx} = \bold{Q}\Lambda^2\bold{Q}^\top$</li>
+				<li>Calculer $\bold{S}=\bold{Q}_{(:, 1:K)}\Lambda_{(1:K, 1:K)}$ and $\bold{W}= \bold{S}^{\dagger}$</li>
+				<li>Blanchiement des données : $\bold{z}(t) = \bold{W}\bold{x}(t)$</li>
+				<li>Estimation de $\bold{R}_{zz}(\tau)$ pour différentes valeurs $\tau$</li>
+				<li>Approximation de la diagonalisation jointe $\bold{R}_{zz}(\tau)$ dans une base commune $\bold{U}$</li>
+				<li>Estimation des sources via $\bold{y}(t) = \bold{U}^{\top}\bold{z}(t)$</li>
+			</ol>
+			</section>
+
+			<section>
+				<h2>Exemple de SOBI sur différents mélanges (1/2)</h2>
+				<img src="figures/images/config_1_sobi.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=60%>
+				<div class="multiCol" style="margin-top:0.1em">
+					<div class="col">
+						<label for="no_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp parole bruité<br>
+						</label>
+							<audio id="no_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/nsp_SOBI.wav"/>
+								</audio>
+
+					</div>
+					<div class="col">
+						<label for="cl_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp parole (SOBI)<br>
+						</label>
+							<audio id="cl_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/nsp_K=1_SOBI.wav"/>
+								</audio>
+
+
+					</div>
+					<div class="col">
+						<label for="cl_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp bruit (SOBI)<br>
+						</label>
+							<audio id="cl_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/nsp_K=2_SOBI.wav"/>
+								</audio>
+
+
+					</div>
+		
+			</section>
+
+			<section>
+				<h2>Exemple de SOBI sur différents mélanges (2/2)</h2>
+				<img src="figures/images/config_2_sobi.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=60%>
+				<div class="multiCol" style="margin-top:0.1em">
+					<div class="col">
+						<label for="no_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp 3 locuteurs<br>
+						</label>
+							<audio id="no_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/multi_sp_SOBI.wav"/>
+								</audio> <br>
+
+				    
+						<label for="cl_sp">
+							&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp locuteur 2 (SOBI)<br>
+							</label>
+								<audio id="cl_sp" controls>
+								<source
+										type="audio/mpeg"
+										src="multimedia/audio/multi_sp_K=2_SOBI.wav"/>
+									</audio>
+
+					</div>
+					<div class="col">
+						<label for="cl_sp">
+						&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsplocuteur 1 (SOBI)<br>
+						</label>
+							<audio id="cl_sp" controls>
+							<source
+									type="audio/mpeg"
+									src="multimedia/audio/multi_sp_K=1_SOBI.wav"/>
+								</audio> <br>
+					
+						<label for="cl_sp">
+							&nbsp&nbsp&nbsp	&nbsp&nbsp&nbsp	&nbsp&nbsp locuteur 3 (SOBI)<br>
+							</label>
+								<audio id="cl_sp" controls>
+								<source
+										type="audio/mpeg"
+										src="multimedia/audio/multi_sp_K=3_SOBI.wav"/>
+									</audio>
+			
+
+
+					</div>
+
+
+
+
+
+		
+			</section>		
+	<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+		<h2 id='coverh2'>II/4 - Traitement du signal audio : séparation de sources (mélange convolutif) </h2>
+	</section>	
+	<section>
+		<h2>Source images</h2>
+		<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+		Modèle de mélange instantané : non adapté aux mélanges réels
+		</div>
+	<h3 style='margin-top:0.5em;'> Mélange de sources images</h3>
+		<ul>
+	
+			<li>Soit $\bold{x}_n(f,t) \in \mathbb{R}^M$ la <b>source image</b> de $s_n(f,t)$<br>
+				$\quad\rightarrow$ on reçoit un signal multicanal ssi la source $s_n(f,t)$ est active
+			</li>
+			<li>
+				Modèle de mélange : $\bold{x}(f,t) = \sum_{k=1}^K \bold{x}_n(f,t)$
+			</li>
+	
+		</ul>
+	<h3 style='margin-top:0.5em;'> Décomposition du problème de séparation de sources</h3>
+	<ul>
+		<li> <b>Séparation</b> : estimer $\bold{x}_n(f,t)$ à partir du mélange $\bold{x}(f,t)$</li>
+		<li> <b>Déconvolution</b> : estimer $s_n(f,t)$ à partir de la source image $\bold{x}_n(f,t)$</li>
+	</ul>
+	</section>
+
+	<section>
+		<h2>Représentation temps-fréquence (TF)</h2>
+		<h3 style='margin-top:0.5em;'>Motivation</h3>
+		<ul>
+
+		<li>
+		 Adéquat pour étudier les modèles convolutifs et/ou sous-déterminés
+		</li>
+		</ul>
+			<h3 style='margin-top:0.5em;'>Banc de filtre de la TFCT</h3>
+			<ul>
+				<li> Décomposition dans $F$ sous bandes et décimation en facteur $H \leq F$</li>
+				<li>$H$ est appelée la hop-size</li>
+				<li>filtres d'analyse $h_f$ et filtres de synthèses $g_f$</li>
+				<li>Représentation TF du mélange : $x_m(f,t) = (h_f\ast x_m)(tH)$</li>
+				<li><b> Reconstruction parfaite</b> : $x_m(\tau) = \sum_{f=1}^F\sum_{t\in \mathbb{Z}} g_f(\tau-tH)x_m(f,t)$
+				</li>
+			</ul>
+			<div class="remarque" style='margin-top:0.5em; margin-bottom:0.5em;'>
+			 Alors $\forall f,n ~ \bold{x}(f,t) = \bold{As}(f,t)\quad\texttt{(mélange linéaire instantané)}$
+		 </div>
+		 <aside class="notes">
+			<ul>
+				<li> perfect reconstruction filterbank: MDCT and STFT</li>
+				<li>$T$ is called the hopsize</li>
+				<li>We have the same procedure for the sources</li>
+							<li>Interestingly, the linear instantaneous mixture is unchanged</li>
+			</ul>
+		 </aside>
+	</section>
+
+	<section>
+		<h2>Approche temps-fréquence</h2>
+			<h3 style='margin-top:0.5em;'> modèle de mélange et approximation à bande étroite </h3>
+			<ul>
+				<li>$x_m(t) = \sum_{n=1}^{N}(a_{mn} \ast s_n)(t)$,</li>
+				<li>La réponse impulsionnelle de $a_{mk}$ est courte p/r à la longueur de la fenêtre</li>
+				<li>$\forall m,n,f, a_{mn}(\nu)$ varie lentement comparé à $h_f(\nu)$</li>
+			</ul>
+			<h3 style='margin-top:0.5em;'>Approximation du modèle de mélange convolutionnel</h3>
+			<ul>
+				<li>$x_m(f,t)=\sum_{n=1}^N a_{mn}(f)s_n(f,t)$ i.e. $\bold{x}(f,t)=\bold{A}(f)\bold{s}(f,t)$<br>
+						$\quad\rightarrow$ $F$ mélange de modèles instantanés dans chaque sous-bande fréquentielle<br>
+						$\quad\rightarrow$ on peut utiliser une méthode d'ICA dans chaque sous-bande<br>
+
+				</li>
+	
+			</ul>
+			<div class ="remarque">Problème : si on utilise un algorithme de type ICA, on a une infinité de solutions (on doit constraindre le modèle)</div>
+	</section>
+
+	<section>
+		<h2>Indéterminations</h2>
+		<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+		Indéterminations (permutations et facteurs multiplicatifs) dans les matrices $\bold{C}(f)$
+		</div>
+		<ul>
+		<li>$\forall n$, identifier les index $n, f$ tel que $\forall f, y_{k_f}(f,t)=c_{k_f,k}s_k(f,t)$</li>
+		<li>identifier les facteurs multiples $c_{k_f,k}$</li>
+		</ul>
+		<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+		Une infinité de solutions $\implies$ besoin de contraindre le modèle
+		</div>
+		<h3 style='margin-top:0.5em;'> Hypothèses sur le mélange ou les sources</h3>
+		<ul>
+		<li>modèle continue le long de l'axe fréquentielle des $a_{mk}(f)$ <br>
+				$\quad\rightarrow$ modèle comme formation de voie ou modèle anéchoïque
+		</li>
+		<li> similarité sur l'axe temporelle des $p_n(f,t)$ (ou modèle NMF. Plus tard ! )
+		</li>
+
+		</ul>
+		<aside class="notes">
+		 <ul><li>$a_{mk}$: impulse response of a stable filter</li>
+		 </ul>
+		</aside>
+</section>
+
+<section>
+	<h2>Modèles continues de diffusion</h2>
+	<h3 style='margin-top:0.5em;'>Formation de voies</h3>
+	<ul>
+	<li>Hypothèses : ondes planes, champ lointain, pas de réverbération, antenne linéaire</li>
+	<li>Modèle : $a_{mn}(f)=e^{-2i\pi f\tau_{mn}}$ où $\tau_{mn}=\frac{d_m}{c}\sin(\Theta_n)$</li>
+	<li>Paramètres : positions $d_m$ des capteurs et les angles $\Theta_n$ des sources</li>
+	</ul>
+
+	<h3 style='margin-top:0.5em;'>Modèle anéchoïque</h3>
+	<ul>
+	<li>Hypothèses : source ponctuelle, pas de réverbération</li>
+	<li>Modèle : $a_{mn}(f)=\alpha_{mn}e^{-2i\pi f\tau_{mn}}$ avec $\tau_{mn}=\frac{r_{mn}}{c}$ et $\alpha_{mn} = \frac{1}{\sqrt{4\pi}r_{mn}}$</li>
+	<li>Paramètres : distances $r_{mn}$ entre les micros et les sources</li>
+	</ul>
+	<aside class="notes">
+	 <ul><li>In practice, do not represent a real acoustic mixtures (but solve the multiple permutation problem)</li>
+	 </ul>
+	</aside>
+</section>
+
+
+<section>
+	<h2>Separation via un filtre non stationnaire</h2>
+	Considérons $\bold{y}(f,t) = \bold{B}(f,t)\bold{x}(f,t)$ où $\bold{B}(f,t) \in \mathbb{C}^{N\times M}$
+	<h3 style='margin-top:0.5em;'>Estimation via l'erreur moyenne quadratique</h3>
+	<ul>
+		<li>On cherche $\bold{B}(f,t)$ qui minimise $\mathbb{E}[\mid\mid\bold{y}(f,t)-\bold{s}(f,t)\mid\mid^2_{2} ]$</li>
+		<li>Sol.: $\bold{B}(f,t) = \Sigma_{sx}(f,t)\Sigma_{xx}(f,t)^{-1}~\texttt{(Filtre de Wiener)}$<br>
+				$\quad\rightarrow \Sigma_{xx}(f,t) = \bold{A}(f)\Sigma_{ss}(f,t)\bold{A}(f)^{\mathrm{H}},
+				\Sigma_{sx}(f,t) = \Sigma_{ss}(f,t)\bold{A}(f)^{\mathrm{H}}
+				$
+		</li>
+		<li>
+			$\bold{x}(f,t)=\bold{A}(f)\bold{y}(f,t)$ (reconstruction exacte)
+		</li>
+	</ul>
+	<h3 style='margin-top:0.5em;'>cas particulier : cas monocanal</h3>
+	<ul>
+		<li>sans perte de généralité, on définit $\bold{A}(f)=\left[\begin{array}{ccc}
+1 & \dots & 1\\
+0 & \cdots & 0\\
+\vdots & \cdots & \vdots
+\end{array}\right]$ </li>
+		<li> Alors $y_n(f,t) = \frac{p_n(f,t)}{\sum_{n^\prime=1}^Np_{n^\prime}(f,t)} x(f,t) ~~~~\texttt{(Filtre de Wiener monocanal)}$
+		</li>
+	</ul>
+</section>
+
+<section>
+	<h2>Formalisme probabiliste pour la séparation de sources images</h2>
+	Prenons cette fois-ci le modèle de mélange de sources images :
+	<center>
+		$$
+		\bold{x}(f,t) = \sum_{n=1}^{N}\bold{x}_n(f,t)
+		$$
+	</center>
+	 $\forall n,f,t$ indépendances et suivent une GCCC :
+	<center>
+		$$
+		\bold{x}_n(f,t) \sim \mathcal{N}_{\mathbb{C}}^{M}(\Sigma_{n}(f,t))
+		$$
+	</center>
+Alors, par indépendance et stabilité par sommation on a que :
+<center>
+	$$
+	\bold{x}(f,t) \sim \mathcal{N}_{\mathbb{C}}^{M}(\sum_{n=1}^{N}\Sigma_{n}(f,t) := \Sigma(f,t))
+	$$
+</center>
+
+On peut montrer que : 
+<center>
+	$$
+	\bold{x}_n(f,t) \mid \bold{x}(f,t) \sim \mathcal{N}_{\mathbb{C}}^{M}(\mu_{\bold{x} \mid \bold{n}}, \Sigma_{\bold{x} \mid \bold{n}})
+	$$
+</center>
+
+avec <center>
+	$$\mu_{\bold{x} \mid \bold{n}} = \Sigma_{n}(f,t) \Sigma(f,t)^{-1}\bold{x}(f,t) ~~\texttt{(Filtrage de Wiener)}$$
+	$$\Sigma_{\bold{x} \mid \bold{n}} = \mu_{\bold{x} \mid \bold{n}}\mu_{\bold{x}  \mid \bold{n}}^{\mathsf{H}} +   (\bold{I_{M}} - \Sigma(f,t)^{-1})\Sigma_{n}(f,t) ~~\texttt{(covariance conditionnelle)}$$
+</center>
+<div class="affirmation" style='margin-top:0.5em; margin-bottom:0.5em;'>
+	En soit, le modèle probabiliste GCCR ou l'EMQ sont ici équivalents.
+	</div>
+</section>
+
+</div>
+
+
+
+
+<div class='footer'>
+	<img src="css/theme/img/logo-ensta.svg" id="logo2" alt="Logo"/>	
+	<img src="css/theme/img/logo-Telecom.svg" id="logo1" alt="Logo"/>
+	<div id="middlebox">Apprentissage statistique & son - MI205</div>
+	<ul>
+	</ul>
+</div>
+			</div>
+
+		</div>
+
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: false,
+				slideNumber: true,
+				minScale: 0.1,
+				maxScale: 5,
+				transition: 'none', //
+
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/math-katex/math-katex.js', async: true },
+					{ src: 'plugin/reveald3/reveald3.js' },
+					{ src: 'plugin/highlight/highlight.js', async: true }
+				]
+			});
+		</script>
+
+	</body>
+
+</html>
