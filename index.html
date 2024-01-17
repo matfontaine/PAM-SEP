@@ -193,7 +193,7 @@
 			<h3 style='margin-top:0.5em;'>Deux types</h3>
 			<ul>
 
-				<li>mélange linéaire instantanée : $\bold{x}(t)=\bold{A}\bold{s}(t) \\
+				<li>mélange linéaire instantané : $\bold{x}(t)=\bold{A}\bold{s}(t) \\
 					\quad\rightarrow \mathcal{A}$ est définie par la "matrice de mélange"
 					 $\bold{A}$ (de dimension $M\times N$)
 				</li>
@@ -235,7 +235,7 @@
 	<h2>Mélanges linéaires instantanées</h2>
 	<img src="figures/instantane.png" alt="" style="margin-left:auto; margin-right:auto; display:block; margin-top:0.8em" width=100%>
 	<aside class="notes">
-		<ul><li>(a) : LR oriented at 90 degree< and approximate a ILM</li>
+		<ul><li>(a) : LR oriented at 90 degree and approximate a ILM</li>
 			<li> it is never perfectly instantaneous</li>
 			<li>(b): can be created artificially by using a mixing deck of a computer</li>
 		</ul>
@@ -312,7 +312,7 @@
 		<ul>
 			<li> Mélange linéaire instantané :
 				<center>$$\forall t, \bold{x}(t)=\bold{A}\bold{s}(t)$$</center>
-				$\quad\rightarrow\bold{A}\in\mathbb{R}^{M\times K}$: "matrice de mélange"
+				$\quad\rightarrow\bold{A}\in\mathbb{R}^{M\times N}$: "matrice de mélange"
 			</li>
 			<li>
 				Les sources sont supposées iid. :
@@ -385,7 +385,7 @@
 
 	 <section>
 		<h2>Indepedent component analysis (ICA) (1/2) </h2>
-		<h3 style='margin-top:0.5em;'>Problem Statement</h3>
+		<h3 style='margin-top:0.5em;'>Position du problème</h3>
 		<ul>
 		   <li>
 			   $\bold{A}$ est inconnue et on cherche $\bold{B}$ qui rendent les $y_n(t)$ indépendants (ICA)
@@ -530,7 +530,7 @@
 				<center>$$
 				\bold{R}_{zz}(\tau) = \bold{U}\bold{R_{ss}(\tau)}\bold{U}^\top
 				$$</center>
-				$\bold{U}$ est unique $\Leftrightarrow \forall 1\leq k \neq l \leq K~ \exists \tau, r_{s_k}(\tau) \neq r_{s_l}(\tau)$	
+				$\bold{U}$ est unique $\Leftrightarrow \forall 1\leq n \neq n^{\prime} \leq N~ \exists \tau, r_{s_n}(\tau) \neq r_{s_{n^{\prime}}}(\tau)$	
 			 </div>
 
 
@@ -559,7 +559,7 @@
 			<ol>
 				<li>Estimation de $\Sigma_{xx}$</li>
 				<li>Diagonalisation: $\Sigma_{xx} = \bold{Q}\Lambda^2\bold{Q}^\top$</li>
-				<li>Calculer $\bold{S}=\bold{Q}_{(:, 1:K)}\Lambda_{(1:K, 1:K)}$ and $\bold{W}= \bold{S}^{\dagger}$</li>
+				<li>Calculer $\bold{S}=\bold{Q}_{(:, 1:N)}\Lambda_{(1:N, 1:N)}$ and $\bold{W}= \bold{S}^{\dagger}$</li>
 				<li>Blanchiement des données : $\bold{z}(t) = \bold{W}\bold{x}(t)$</li>
 				<li>Estimation de $\bold{R}_{zz}(\tau)$ pour différentes valeurs $\tau$</li>
 				<li>Approximation de la diagonalisation jointe $\bold{R}_{zz}(\tau)$ dans une base commune $\bold{U}$</li>
@@ -664,7 +664,7 @@
 		
 			</section>		
 	<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
-		<h2 id='coverh2'>II/4 - Traitement du signal audio : séparation de sources (mélange convolutif) </h2>
+		<h2 id='coverh2'>III - Séparation de sources (mélange convolutif) </h2>
 	</section>	
 	<section>
 		<h2>Source images</h2>
@@ -1170,7 +1170,7 @@ Pour résumer on pourrait avoir l'algorithme suivant :
 </section>
 
 <section>
-	<h1 style="margin-top:-1em;">AuxIVA (Auxiliary Independent component analysis) (1/2)</h1>
+	<h1 style="margin-top:-0.2em;">AuxIVA (Auxiliary Independent component analysis)</h1>
 	<ul>
 		<li>On reprend le modèle convolutif avec l'approximation en bande étroite :
 		<center>
@@ -1197,8 +1197,8 @@ Pour résumer on pourrait avoir l'algorithme suivant :
 	<li>La fonction auxiliaire $Q(\bold{W}, \bold{V})$ est alors 
 		<center>
 			$$
-			Q(\bold{W}, \bold{V}) = \sum_{n,f=1}^{N,F}\bold{w}_{n}(f)\mathbb{E}[\frac{-\log P(||\bold{y}_n^{(t)}||^2)^{\prime}}{r_n^{(t)}}]
-			\bold{w}_{n}^\mathsf{H}(f)^
+			Q(\bold{W}, \bold{V}) = \sum_{n,f=1}^{N,F}\bold{w}_{n}(f)\mathbb{E}[\frac{-\log P(||\bold{y}_n^{t}||^2)^{\prime}}{r_n^{(t)}}]
+			\bold{w}_{n}^\mathsf{H}(f)
 			 - \log|\det(W(f))| + C
 			$$
 		</center>
@@ -1404,7 +1404,7 @@ Pour résumer on pourrait avoir l'algorithme suivant :
 <section>
 	<h1>Exemples d'applications (1/3)</h1>
 	<ul>
-		<li>Ici, si $W$ représente les notes. Alors $H$ est transcription approximative.</li>
+		<li>Ici, si $W$ représente les notes. Alors $H$ est une transcription approximative.</li>
 	</ul>
 	<center>
 		<img src="figures/images/piano_NMF.png", width="100%">
