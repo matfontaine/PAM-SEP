@@ -36,7 +36,7 @@
 						<a href="mailto:mathieu.fontaine@telecom-paris.fr", class="mail">mathieu.fontaine@telecom-paris.fr</a>
 					</p>
 					<p id="date">
-					Jeudi 18 Janvier 2024
+					Jeudi 16 Janvier 2025
 					</p>
 
 
@@ -1998,6 +1998,115 @@ $$
 <div class="remarque">Le problème précédent est une équation de Ricatti et peut être résolu en pratique</div>
 </p>
 </section>
+
+<section class="cover" data-background="figures/background-blur.jpg" data-state="no-title-footer no-progressbar has-dark-background">
+	<h2 id='coverh2'>VII - Séparation de sources par réseaux de neurones </h2>
+</section>	
+
+<section>
+<h1>Introduction, résumé</h1>
+<ul>
+	<li>Une majeure partie de ces algorithmes sont soit en monocanal ou en stéréo</li>
+	<li>Souvent concentrés sur un ensemble d'instruments (appelés stems) classique : basse, chant, batterie et autre</li>
+	<li>On va brièvement discuter de deux modèles : open-unmix et demucs</li>
+</ul>
+</section>
+
+<section>
+	<h1>open-unmix</h1>
+	<ul>
+		<li>Chaque modèle est séparé et entrainé de manière indépendante</li>
+		<li>entrée : (nb_frames, nb_samples, nb_canaux, nb_bins) </li>
+		<li>(nb_frame, nb_bins) : Temps-fréquence de la STFT</li>
+		<li>(nb_canaux) : le nombre de microphones</li>
+		<li>(nb_sample) : le nombre d'échantillon dans le batch</li>
+
+
+	</ul>
+	<center>
+	<img src="figures/images/open-unmix.png", width="80%">
+</center>
+	<aside class="notes">
+		<ul>
+			<li>On standarise le signal pour chaque fréquence </li>
+			<li>un premier fully-connected compresse de (nb_frames * nb_samples, nb_channels*nb_bins) vers (nb_frames * nb_samples, hidden_size)</li>
+			<li>Un batch normalization pour être plus robuste à la variation du gain</li>
+			<li>on concatène alors la sortie du lstm avec l'input du LSTM (skip connection)</li>
+			<li>On recompresse à nouveau avec un fully-connected + batch-norm + relu</li>
+			<li>On étend avec un FCN et on reshape pour avoir un mask qui matche les dimensions </li>
+	
+		</ul>
+	</aside>
+
+	<div class="references">
+		<ul><li>
+			F.-R. Stöter and S. Uhlich and A. Liutkus and Y. Mitsufuji,
+			Open-Unmix - A Reference Implementation for Music Source Separation, JOSS, 2019.
+		</li>
+				</ul>
+	</div>
+</section>
+<section>
+	<h1>Demucs</h1>
+	<div class="multiCol">
+		<div class="col">
+			<center>
+				<img src="figures/images/demucs.png", width="100%">
+			</center>
+		</div>
+		<div class="col">
+			<ul>
+				<li>Une base U-Net qui mixe le spectogramme et le signal temporel</li>
+				<li>Le CDTE inclus plusieurs Transformer encoder layer et cross-attention</li>
+				<li>Fonctionne en stéréo/mono et avec 5 stems (piano étant considéré comme un stem)</li>
+			</ul>
+		</div>
+	</div>
+
+
+<div class="references">
+	<ul><li>
+		Hybrid Transformers for Music Source Separation, Rouard, Simon and Massa, Francisco and Défossez, Alexandre, ICASSP, 2023.
+	</li>
+			</ul>
+</div>
+</section>
+
+<section>
+	<h1>Outils & algorithmes</h1>
+	<h3>SOBI algorithm</h3>
+	<ul>
+		<li>
+			<a href="https://github.com/davidrigie/sobi">https://github.com/davidrigie/sobi</a>
+		</li>
+	</ul>
+	<h3>Independent vector analysis, Independent low-rank matrix analysis, FastMNMF + simulation de salle</h3>
+	<ul>
+		<li>
+	<a href="https://github.com/LCAV/pyroomacoustics"> https://github.com/LCAV/pyroomacoustics</a></li>
+</ul>
+	<h3 style='margin-top:0.5em;'>Plus d'algorithmes de MNMF</h3>
+	<ul>
+		<li>
+	<a href="https://github.com/tky823/ssspy"> https://github.com/tky823/ssspy</a>
+</li>
+</ul>
+<h3 style='margin-top:0.5em;'>Deep Learning techniques</h3>
+<ul>
+
+<li>
+<a href="https://sigsep.github.io/open-unmix/"> https://sigsep.github.io/open-unmix/</a>
+</li>
+
+<li>
+	<a href="https://github.com/adefossez/demucs"> https://github.com/adefossez/demucs</a>
+	</li>
+<li>
+	<a href="https://github.com/deezer/spleeter"> https://github.com/deezer/spleeter</a>
+	</li>
+</ul>
+</section>
+
 </div>
 
 
